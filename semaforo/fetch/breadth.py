@@ -35,12 +35,17 @@ def fetch_breadth(start: str = DEFAULT_START, chunk_size: int = 100) -> pd.DataF
 
     ma200 = prices.rolling(200, min_periods=200).mean()
     ma50 = prices.rolling(50, min_periods=50).mean()
-    valid = prices.notna() & ma200.notna()
-    coverage = valid.sum(axis=1)
-    pct200 = (prices > ma200)[valid].sum(axis=1) / coverage * 100
-    pct50 = ((prices > ma50) & prices.notna() & ma50.notna()).sum(axis=1) / (
-        (prices.notna() & ma50.notna()).sum(axis=1)) * 100
+    coverage = (prices.notna() & ma200.notna()).sum(axis=1)
+    out = pd.DataFrame({
+        "pct_above_ma200": _pct_above(prices, ma200),
+        "pct_above_ma50": _pct_above(prices, ma50),
+    })
+    # scarta i giorni con troppi pochi titoli calcolabili (warmup MA200, festivi anomali)
+    return out[coverage >= MIN_COVERAGE]
 
-    out = pd.DataFrame({"pct_above_ma200": pct200, "pct_above_ma50": pct50,
-                        "coverage": coverage})
-    return out[out["coverage"] >= MIN_COVERAGE].drop(columns="coverage")
+
+def _pct_above(prices: pd.DataFrame, ma: pd.DataFrame) -> pd.Series:
+    valid = prices.notna() & ma.notna()
+    cov = valid.sum(axis=1)
+    above = ((prices > ma) & valid).sum(axis=1)
+    return above / cov.where(cov > 0) * 100
