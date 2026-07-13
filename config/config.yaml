@@ -1,0 +1,74 @@
+# Semaforo — configurazione v0.1
+# Tutti i pesi e le soglie sono punti di partenza (vedi docs/BRIEF_v0.1.md §8, Fase 4: backtest e taratura).
+
+tickers:
+  yahoo:
+    equity: [ACWI, SPY, QQQ, IWM, RSP, URTH]
+    other: [GLD, HYG, IEF, BTC-USD]
+    vol: ["^VIX", "^VIX3M"]
+  breadth:
+    universe: sp500          # costituenti da Wikipedia, download batch yfinance
+    fallback: rsp_spy        # se il calcolo breadth fallisce, RSP/SPY assorbe il peso
+
+fred:
+  # chiave API: variabile d'ambiente FRED_API_KEY (in locale .env, su GitHub nei Secrets)
+  series:
+    hy_oas: BAMLH0A0HYM2
+    anfci: ANFCI
+    nfci: NFCI
+    sahm: SAHMREALTIME
+    claims_4w: IC4WSA
+    cfnai_ma3: CFNAIMA3
+    t10y3m: T10Y3M
+    core_pce: PCEPILFE
+    fed_funds: DFF
+    real_10y: DFII10
+
+risk:
+  weights:
+    trend: 0.30
+    breadth: 0.20
+    vol: 0.15
+    credit: 0.20
+    macro: 0.15
+  trend_asset_weights:
+    SPY: 0.30
+    ACWI: 0.30
+    QQQ: 0.15
+    IWM: 0.15
+    GLD: 0.05
+    BTC-USD: 0.05
+  colors:              # score 0-100, alto = sano
+    green_min: 65
+    yellow_min: 40
+  hysteresis:
+    min_margin: 3      # punti oltre la soglia
+    min_days: 3        # oppure sedute consecutive
+
+opportunity:
+  weights:
+    drawdown: 0.30
+    valuation: 0.25
+    fear: 0.20
+    stabilization: 0.25
+  labels:              # score 0-100, alto = conveniente
+    neutrale_min: 25
+    interessante_min: 50
+    fortemente_interessante_min: 75
+  drawdown:
+    floor: 0.05        # sotto il 5% di dd lo score è 0
+    cap: 0.30          # dd >= 30% -> 100
+  stabilization:
+    dd_trigger: 0.15   # attiva solo se dd >= 15% negli ultimi 12 mesi
+
+fear_greed:
+  weights:
+    vix: 0.25
+    breadth: 0.25
+    credit: 0.25
+    putcall: 0.15
+    momentum: 0.10
+
+entry_window:
+  opportunity_min_label: interessante
+  risk_lookback_days: 10   # colore rischio migliore rispetto a N sedute fa
