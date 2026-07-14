@@ -1,0 +1,13 @@
+Chiave,Valore,Istruzioni
+profilo,NOME,Stesso nome usato nella colonna Profilo del registro
+fee_base_settimanale,100,EUR a settimana (il semaforo la moltiplica ogni settimana)
+capitale_totale,50000,EUR totali che intendi investire nel piano
+data_inizio,2026-07-20,Formato AAAA-MM-GG
+fase,accumulo,accumulo / mantenimento / decumulo
+ordine_minimo,50,EUR: sotto questa soglia si concentra tutto su un solo ETF
+glidepath,SI,SI = quota azionaria da 80% a 60% col completamento del piano
+etf_1,VWCE; IE00BK5BQT80; azionario_globale; 45,ticker; ISIN; blocco; peso obiettivo %
+etf_2,XDEW; IE00BLNMYC90; equal_weight; 15,"blocchi validi: azionario_globale, equal_weight, small_cap, oro, obbligazionario"
+etf_3,WSML; IE00BF4RFH31; small_cap; 10,I pesi devono sommare a 100
+etf_4,SGLN; IE00B4ND3602; oro; 10,
+etf_5,VAGF; IE00BG47KH54; obbligazionario; 20,ETF di esempio: verifica gli ISIN col tuo broker

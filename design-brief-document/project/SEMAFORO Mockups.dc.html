@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/broadsheet-68dc5546-5e13-4471-bfb6-692f16b0632a/styles.css">
+<script src="_ds/broadsheet-68dc5546-5e13-4471-bfb6-692f16b0632a/_ds_bundle.js"></script>
+<style>
+body{margin:0;background:var(--color-neutral-200);font-family:var(--font-body)}
+a{color:var(--color-accent)}a:hover{color:var(--color-accent-600)}
+.dv-turn{padding:40px 44px 32px;border-bottom:1px solid var(--color-divider);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:var(--color-text);color:var(--color-bg);border-radius:4px;text-decoration:none}
+.dv-tname{font-family:var(--font-heading);font-weight:600;font-size:14px;color:var(--color-text)}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:color-mix(in srgb, var(--color-text) 8%, transparent);color:var(--color-text);border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font-size:12px;color:var(--color-neutral-700)}
+.dv-card{max-width:100%;background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;box-shadow:var(--shadow-sm);overflow:hidden}
+.dv-opt:target .dv-oid{background:var(--color-accent);color:var(--color-bg)}
+.dv-next{margin:22px 0 0;font-size:12px;line-height:1.5;color:var(--color-neutral-700)}
+</style>
+</helmet>
+<section class="dv-turn" id="t1">
+  <div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Dashboard Semaforo — sistema Broadsheet, tema light</span></div>
+
+  <div style="max-width:760px;background:var(--color-bg);border:1px solid var(--color-divider);border-radius:8px;padding:20px 24px;margin-bottom:26px;font-size:13px;line-height:1.6;color:var(--color-neutral-800)">
+    <div style="font-family:var(--font-heading);font-weight:600;font-size:15px;color:var(--color-text);margin-bottom:6px">Ragionamento di design</div>
+    <div><b>Sistema</b>: Broadsheet — Source Serif 4 su fondo carta, niente box: la gerarchia è fatta di scala tipografica e spazio bianco. Ciano per gli elementi interattivi. <b>Tensione rischio/opportunità</b>: due colonne gemelle con tag di stato + una riga di sintesi in corsivo che le lega. <b>Scala opportunità</b>: la rampa magenta del sistema (tenue → piena), hue separata dal verde/giallo/rosso del rischio — mai solo colore, sempre etichetta testuale. <b>Finestra di ingresso</b> (<a class="dv-oid" href="#1d">1d</a>): campo magenta in cima — il colore raro per l'evento raro. <b>Importo settimanale</b>: cifra a lastre CMYK fuori registro (il trattamento display del sistema). Semantici verde/giallo/rosso come estensioni al registro di stampa; token e misure in <a class="dv-oid" href="#1i">1i</a>.</div>
+  </div>
+
+  <div class="dv-opts">
+    <div class="dv-opt" id="1a"><div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Desktop 1440 · Default (Matteo, 13/07/2026)</div><div class="dv-card" style="width:1440px" data-screen-label="Desktop Default"><dc-import name="Semaforo Desktop" variant="default" hint-size="1440px,1620px"></dc-import></div></div>
+    <div class="dv-opt" id="1b"><div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Mobile 390 · Default</div><div class="dv-card" style="width:390px" data-screen-label="Mobile Default"><dc-import name="Semaforo Mobile" hint-size="390px,1560px"></dc-import></div></div>
+  </div>
+
+  <div class="dv-opts" style="margin-top:36px">
+    <div class="dv-opt" id="1c"><div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Desktop · Prima visita (nessun profilo)</div><div class="dv-card" style="width:1440px" data-screen-label="Desktop Prima visita"><dc-import name="Semaforo Desktop" variant="first" hint-size="1440px,1560px"></dc-import></div></div>
+  </div>
+  <div class="dv-opts" style="margin-top:36px">
+    <div class="dv-opt" id="1d"><div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Desktop · Finestra di ingresso attiva (rischio giallo 43 ↗, opportunità interessante 67)</div><div class="dv-card" style="width:1440px" data-screen-label="Desktop Finestra di ingresso"><dc-import name="Semaforo Desktop" variant="window" hint-size="1440px,1740px"></dc-import></div></div>
+  </div>
+  <div class="dv-opts" style="margin-top:36px">
+    <div class="dv-opt" id="1e"><div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Desktop · Dati non freschi (ultimo calcolo 4 giorni fa)</div><div class="dv-card" style="width:1440px" data-screen-label="Desktop Dati non freschi"><dc-import name="Semaforo Desktop" variant="stale" hint-size="1440px,1700px"></dc-import></div></div>
+  </div>
+  <div class="dv-opts" style="margin-top:36px">
+    <div class="dv-opt" id="1f"><div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Desktop · Errore lettura foglio Google (decisione degradata)</div><div class="dv-card" style="width:1440px" data-screen-label="Desktop Errore foglio"><dc-import name="Semaforo Desktop" variant="error" hint-size="1440px,1600px"></dc-import></div></div>
+  </div>
+  <div class="dv-opts" style="margin-top:36px">
+    <div class="dv-opt" id="1g"><div class="dv-olabel"><a class="dv-oid" href="#1g">1g</a>Desktop · Loading (skeleton)</div><div class="dv-card" style="width:1440px" data-screen-label="Desktop Loading"><dc-import name="Semaforo Desktop" variant="loading" hint-size="1440px,1100px"></dc-import></div></div>
+
+    <div class="dv-opt" id="1h"><div class="dv-olabel"><a class="dv-oid" href="#1h">1h</a>Impostazioni profilo (pannello)</div>
+      <div class="dv-card" style="width:720px" data-screen-label="Impostazioni profilo">
+        <div style="padding:40px;box-sizing:border-box;color:var(--color-text);font-family:var(--font-body)">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:25px">
+            <h3 style="margin:0">Impostazioni profilo</h3>
+            <a href="#" class="btn btn-ghost" style="text-decoration:none">Chiudi ✕</a>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px 30px">
+            <div class="field"><label>Nome profilo</label><div class="input" style="display:flex;align-items:center;min-height:44px">Matteo</div></div>
+            <div class="field"><label>Fase</label>
+              <div class="seg" style="min-height:44px">
+                <span class="seg-opt" style="background:var(--color-accent);color:var(--color-bg)">Accumulo</span>
+                <span class="seg-opt" style="border-left:1px solid var(--color-divider)">Mantenimento</span>
+                <span class="seg-opt" style="border-left:1px solid var(--color-divider)">Decumulo</span>
+              </div>
+            </div>
+            <div class="field"><label>Fee base settimanale (€)</label><div class="input" style="display:flex;align-items:center;min-height:44px;font-variant-numeric:tabular-nums">100</div></div>
+            <div class="field"><label>Capitale totale del piano (€)</label><div class="input" style="display:flex;align-items:center;min-height:44px;font-variant-numeric:tabular-nums">18.000</div></div>
+            <div class="field"><label>Data inizio</label><div class="input" style="display:flex;align-items:center;min-height:44px;font-variant-numeric:tabular-nums">12/02/2024</div></div>
+            <div></div>
+            <div class="field" style="grid-column:1 / -1"><label>Link CSV — Registro versamenti</label><div class="input" style="display:flex;align-items:center;min-height:44px;color:var(--color-neutral-700);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">https://docs.google.com/spreadsheets/d/e/2PACX-…/pub?output=csv</div></div>
+            <div class="field" style="grid-column:1 / -1"><label>Link CSV — Profilo</label><div class="input" style="display:flex;align-items:center;min-height:44px;color:var(--color-neutral-700);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">https://docs.google.com/spreadsheets/d/e/2PACX-…/pub?gid=1&amp;output=csv</div></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:30px">
+            <div style="display:flex;gap:10px">
+              <a href="#" class="btn btn-secondary" style="min-height:44px;text-decoration:none">Scarica template registro</a>
+              <a href="#" class="btn btn-secondary" style="min-height:44px;text-decoration:none">Esporta / Importa profilo</a>
+            </div>
+            <a href="#" class="btn btn-primary" style="min-height:44px;padding-left:30px;padding-right:30px;text-decoration:none">Salva</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dv-opt" id="1i"><div class="dv-olabel"><a class="dv-oid" href="#1i">1i</a>Spec — token Broadsheet + estensioni semantiche, tipografia, misure</div>
+      <div class="dv-card" style="width:720px" data-screen-label="Spec token e misure">
+        <div style="padding:30px 40px;color:var(--color-text);font-size:13px;line-height:1.5;font-family:var(--font-body)">
+          <h4 style="margin:0 0 20px">Design token</h4>
+
+          <h6 style="margin:0 0 10px;color:var(--color-neutral-600)">Neutri — dal sistema Broadsheet</h6>
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px">
+            <sc-for list="{{ neutrals }}" as="s" hint-placeholder-count="6">
+              <div><div style="height:44px;border-radius:var(--radius-md);background:{{ s.hex }};border:1px solid var(--color-divider)"></div><div style="font-size:11px;font-family:var(--font-heading);font-weight:600;margin-top:5px">{{ s.name }}</div><div style="font-size:10.5px;font-family:ui-monospace,Menlo,monospace;color:var(--color-neutral-700)">{{ s.hex }}</div><div style="font-size:10px;font-family:ui-monospace,Menlo,monospace;color:var(--color-neutral-600)">{{ s.token }}</div></div>
+            </sc-for>
+          </div>
+
+          <h6 style="margin:0 0 10px;color:var(--color-neutral-600)">Semantici rischio — estensioni (testo / fondo)</h6>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px">
+            <sc-for list="{{ risks }}" as="s" hint-placeholder-count="3">
+              <div><div style="height:44px;border-radius:var(--radius-md);background:{{ s.bg }};color:{{ s.t }};display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase">{{ s.name }}</div><div style="font-size:10.5px;font-family:ui-monospace,Menlo,monospace;color:var(--color-neutral-700);margin-top:5px">{{ s.t }} / {{ s.bg }}</div></div>
+            </sc-for>
+          </div>
+          <div style="font-size:11px;font-style:italic;color:var(--color-neutral-700);margin-bottom:20px">Non presenti nel sistema: proposti nello stesso registro di stampa (il giallo pieno riusa --color-process-yellow #EDBB00 per barre e marcatori).</div>
+
+          <h6 style="margin:0 0 10px;color:var(--color-neutral-600)">Scala opportunità — rampa magenta del sistema (4 livelli)</h6>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:8px">
+            <sc-for list="{{ opps }}" as="s" hint-placeholder-count="4">
+              <div><div style="height:44px;border-radius:var(--radius-md);background:{{ s.bg }};color:{{ s.t }};display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-weight:600;font-size:11px;text-align:center;line-height:1.15;padding:0 4px">{{ s.name }}</div><div style="font-size:10px;font-family:ui-monospace,Menlo,monospace;color:var(--color-neutral-600);margin-top:5px">{{ s.token }}</div></div>
+            </sc-for>
+          </div>
+          <div style="font-size:11px;font-style:italic;color:var(--color-neutral-700);margin-bottom:20px">Magenta = anche il colore della finestra di ingresso: lo spot color raro per l'evento raro. Ciano riservato agli elementi interattivi (mai i due accenti nello stesso componente).</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+            <div>
+              <h6 style="margin:0 0 8px;color:var(--color-neutral-600)">Tipografia</h6>
+              <div style="font-size:12.5px;line-height:1.7;color:var(--color-neutral-800)">Source Serif 4 — 400 / 600, corsivo vero per sintesi e motivazioni.<br>Scala: 11 · 12 · 13 · 14 · 15 · 17 · 20 · 25 · 30 · 44/52 (punteggi) · 54/76 (importo, lastre CMYK).<br>Numeri: <span style="font-family:ui-monospace,Menlo,monospace">tabular-nums</span> su punteggi, importi, date.<br>Kicker di sezione: h6 — 13px, maiuscolo, tracking 0.08em.</div>
+            </div>
+            <div>
+              <h6 style="margin:0 0 8px;color:var(--color-neutral-600)">Misure</h6>
+              <div style="font-size:12.5px;line-height:1.7;color:var(--color-neutral-800)">Spaziature: scala Broadsheet ×1.25 — 5 · 10 · 15 · 20 · 30 · 40 (px).<br>Raggi: 1 / 2 / 4 px. Niente box né card: sezioni separate da 50px di bianco.<br>Contenuto desktop: max-width 1100px, flush-left (margine 60px).<br>Touch target ≥ 44px. Interattivi: ciano <span style="font-family:ui-monospace,Menlo,monospace">#0088b0</span>; hover step 600.<br>Tema dark: il sistema è solo carta — da derivare in seguito invertendo le rampe (fuori da questi mockup).</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="dv-next">Prova: "mostra le componenti ripiegate in <a class="dv-oid" href="#1a">1a</a>" · "il campo magenta in <a class="dv-oid" href="#1d">1d</a> più forte" · "l'importo senza lastre CMYK"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      neutrals: [
+        { name: 'Carta', hex: '#f3f2f2', token: '--color-bg' },
+        { name: 'Superficie', hex: '#eae9e9', token: '--color-surface' },
+        { name: 'Inchiostro', hex: '#201e1d', token: '--color-text' },
+        { name: 'Neutro 600', hex: '#7d7979', token: '--color-neutral-600' },
+        { name: 'Neutro 200', hex: '#eae7e7', token: '--color-neutral-200' },
+        { name: 'Ciano', hex: '#0088b0', token: '--color-accent' }
+      ],
+      risks: [
+        { name: 'Verde', t: '#1E6B3C', bg: '#DDEEE2' },
+        { name: 'Giallo', t: '#8A6A00', bg: '#F5ECC9' },
+        { name: 'Rosso', t: '#B3372C', bg: '#F5E0DC' }
+      ],
+      opps: [
+        { name: 'Caro', t: '#790e3d', bg: '#fff1f4', token: '--color-accent-2-100 / -800' },
+        { name: 'Neutrale', t: '#790e3d', bg: '#ffdee6', token: '--color-accent-2-200 / -800' },
+        { name: 'Interessante', t: '#4b1528', bg: '#ffc0d0', token: '--color-accent-2-300 / -900' },
+        { name: 'Fort. interessante', t: '#f3f2f2', bg: '#aa0b56', token: '--color-accent-2-700 / bg' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

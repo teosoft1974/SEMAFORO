@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Semaforo — rilevatore di regime per il tuo PAC</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%231E6B3C'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+/* ============ Design system: Broadsheet (dal mockup Claude Design) ============ */
+:root{
+  --color-bg:#f3f2f2; --color-surface:#eae9e9; --color-text:#201e1d;
+  --color-accent:#0088b0; --color-accent-hover:#006786;
+  --color-divider:color-mix(in srgb, var(--color-text) 16%, transparent);
+  --color-faint:color-mix(in srgb, var(--color-text) 8%, transparent);
+  --n600:#7d7979; --n700:#605d5d; --n200:#eae7e7;
+  --m100:#fff1f4; --m200:#ffdee6; --m300:#ffc0d0; --m400:#ff90b1;
+  --m500:#ff458e; --m700:#aa0b56; --m800:#790e3d; --m900:#4b1528;
+  --chart-opp:#d6006c;
+  --sem-verde:#1E6B3C; --sem-verde-tint:#DDEEE2; --sem-verde-bar:#2E7D46;
+  --sem-giallo:#8A6A00; --sem-giallo-tint:#F5ECC9; --sem-giallo-bar:#EDBB00;
+  --sem-rosso:#B3372C; --sem-rosso-tint:#F5E0DC; --sem-rosso-bar:#B3372C;
+  --font-h:"Source Serif 4",Georgia,serif; --font-b:"Source Serif 4",Georgia,serif;
+  --r-sm:1px; --r-md:2px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --color-bg:#1b1918; --color-surface:#242121; --color-text:#eceae8;
+    --color-accent:#45b7dc; --color-accent-hover:#7fd0ea;
+    --n600:#9b9695; --n700:#b3aeac; --n200:#2c2929;
+    --m100:#33151f; --m200:#471b2b; --m300:#5e2239; --m400:#8f3f63;
+    --m500:#ff458e; --m700:#c42a6d; --m800:#ff9cc0; --m900:#ffc0d0;
+    --chart-opp:#ff5fa2;
+    --sem-verde:#84cf9d; --sem-verde-tint:#1e3326; --sem-verde-bar:#4d9d67;
+    --sem-giallo:#dfc06a; --sem-giallo-tint:#35301a; --sem-giallo-bar:#c9a220;
+    --sem-rosso:#e79a8e; --sem-rosso-tint:#3a211c; --sem-rosso-bar:#cf6a5c;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--color-bg);color:var(--color-text);font-family:var(--font-b);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--color-accent)} a:hover{color:var(--color-accent-hover)}
+.wrap{max-width:1100px;margin:0;padding:30px 20px 60px 60px}
+h6.kicker{margin:0;font-family:var(--font-h);font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text)}
+.kicker.accent{color:var(--color-accent)} .kicker.muted{color:var(--n600)}
+.num{font-variant-numeric:tabular-nums}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:var(--r-md);font-family:var(--font-h);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 20px;border-radius:var(--r-md);font-family:var(--font-h);font-weight:600;font-size:14px;text-decoration:none;cursor:pointer;border:1px solid transparent}
+.btn-primary{background:var(--color-accent);color:var(--color-bg)} .btn-primary:hover{background:var(--color-accent-hover);color:var(--color-bg)}
+.btn-secondary{background:transparent;color:var(--color-text);border-color:var(--color-divider)} .btn-secondary:hover{border-color:var(--color-text);color:var(--color-text)}
+.btn-block{display:flex;width:100%}
+.seg{display:inline-flex;border:1px solid var(--color-divider);border-radius:var(--r-md);overflow:hidden}
+.seg button{appearance:none;border:0;background:transparent;color:var(--color-text);font:inherit;font-family:var(--font-h);font-weight:600;font-size:13px;min-width:44px;min-height:36px;padding:0 10px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--color-divider)}
+.seg button[aria-pressed="true"]{background:var(--color-accent);color:var(--color-bg)}
+.rule{height:1px;background:var(--color-text)}
+.hair{border-bottom:1px solid var(--color-faint)}
+.banner{border-radius:var(--r-md);padding:15px 20px;margin-bottom:30px}
+.italic{font-style:italic}
+.mut{color:var(--n600)} .mut2{color:var(--n700)}
+.field label{display:block;font-family:var(--font-h);font-weight:600;font-size:13px;margin-bottom:5px}
+.field input{width:100%;min-height:44px;padding:0 12px;border:1px solid var(--color-divider);border-radius:var(--r-md);background:var(--color-bg);color:var(--color-text);font:inherit;font-size:14px}
+.field input:focus{outline:2px solid var(--color-accent);outline-offset:0}
+dialog{border:1px solid var(--color-divider);border-radius:4px;background:var(--color-bg);color:var(--color-text);max-width:640px;width:calc(100vw - 40px);padding:30px;box-shadow:0 12px 32px color-mix(in srgb,#000 30%,transparent)}
+dialog::backdrop{background:color-mix(in srgb,#000 45%,transparent)}
+details.sec summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;min-height:44px}
+details.sec summary::-webkit-details-marker{display:none}
+details.sec summary .tog{font-family:var(--font-h);font-weight:600;font-size:13px;color:var(--color-accent)}
+details.sec summary .tog::after{content:" ▸"} details.sec[open] summary .tog::after{content:" ▴"}
+.comp-row{display:grid;grid-template-columns:120px 40px 1fr 50px;gap:15px;align-items:center;padding:8px 0;border-bottom:1px solid var(--color-faint)}
+.bar-bg{height:5px;border-radius:var(--r-sm);background:var(--n200);overflow:hidden}
+.bar-fill{height:100%}
+.det-row{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid var(--color-faint)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 80px}
+.ind-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px 80px;margin-bottom:50px}
+.dec-grid{display:grid;grid-template-columns:1fr 320px;gap:40px 80px;align-items:start;margin-bottom:50px}
+.skl{border-radius:var(--r-md);background:var(--n200);animation:skpulse 1.6s ease-in-out infinite}
+@keyframes skpulse{0%,100%{opacity:.55}50%{opacity:1}}
+@media (prefers-reduced-motion: reduce){.skl{animation:none}}
+.side-row{display:flex;justify-content:space-between;font-size:14px;padding:8px 0}
+svg text{font-family:var(--font-b)}
+.ch-band-v{fill:var(--sem-verde-tint);opacity:.6} .ch-band-g{fill:var(--sem-giallo-tint);opacity:.6} .ch-band-r{fill:var(--sem-rosso-tint);opacity:.5}
+.ch-risk{stroke:var(--color-text);fill:none;stroke-width:2}
+.ch-opp{stroke:var(--chart-opp);fill:none;stroke-width:1.5;opacity:.85}
+.ch-marker{stroke:var(--n600);stroke-dasharray:3 4;stroke-width:1}
+.ch-txt{fill:var(--n600);font-size:11px}
+.ch-win{fill:var(--m700)}
+.hide{display:none !important}
+@media (max-width:840px){
+  .wrap{padding:20px 20px 40px}
+  .dec-grid,.ind-grid,.grid2{grid-template-columns:1fr;gap:30px}
+  .grid2{gap:0}
+  .amount{font-size:54px !important}
+  .score{font-size:44px !important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Testata -->
+  <header style="display:flex;align-items:baseline;gap:20px;margin-bottom:10px;flex-wrap:wrap">
+    <div style="font-family:var(--font-h);font-weight:600;font-size:26px;letter-spacing:-.015em">Semaforo</div>
+    <div class="mut" style="font-size:13px">rilevatore di regime per il tuo piano di accumulo</div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:20px">
+      <div class="mut" style="font-size:13px">Aggiornato al <span id="hdr-date" class="num" style="color:var(--color-text)">—</span></div>
+      <button id="btn-profile" class="btn" style="background:none;border:none;color:var(--color-accent);padding:0;min-height:44px" aria-haspopup="dialog">— ▾</button>
+    </div>
+  </header>
+  <div class="rule" style="margin-bottom:30px"></div>
+
+  <!-- Loading -->
+  <div id="loading">
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <div class="skl" style="height:160px;width:70%"></div>
+      <div class="grid2" style="gap:40px"><div class="skl" style="height:300px"></div><div class="skl" style="height:300px"></div></div>
+      <div class="skl" style="height:280px"></div>
+      <div class="mut italic" style="font-size:14px">Carico gli ultimi dati di mercato…</div>
+    </div>
+  </div>
+
+  <div id="app" class="hide">
+
+    <!-- Avviso dati non freschi -->
+    <div id="stale" class="banner hide" style="background:var(--sem-giallo-tint)">
+      <span style="font-family:var(--font-h);font-weight:600;font-size:14px;color:var(--sem-giallo)">Avviso · </span>
+      <span id="stale-text" style="font-size:14px"></span>
+    </div>
+
+    <!-- Finestra di ingresso -->
+    <div id="window-banner" class="banner hide" style="background:var(--m100);padding:25px 30px">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--m800);font-family:var(--font-h);font-weight:600;margin-bottom:5px">Evento raro — 22 giorni in 21 anni</div>
+      <div style="font-family:var(--font-h);font-weight:600;font-size:30px;letter-spacing:-.015em;color:var(--m800);margin-bottom:5px">Finestra di ingresso attiva</div>
+      <div class="italic" style="font-size:15px;max-width:720px;line-height:1.55">Il mercato è fragile ma in miglioramento e i prezzi sono interessanti — una buona occasione per versare di più, con calma.</div>
+    </div>
+
+    <!-- Prima visita -->
+    <section id="first-visit" class="hide" style="margin-bottom:40px;max-width:760px">
+      <h6 class="kicker accent" style="margin-bottom:10px">Il tuo piano</h6>
+      <div style="font-family:var(--font-h);font-weight:600;font-size:25px;letter-spacing:-.015em;margin-bottom:5px">Configura il tuo PAC per ricevere il suggerimento settimanale</div>
+      <div class="mut2" style="font-size:15px;line-height:1.55;margin-bottom:15px">Ti servono solo i link ai tuoi fogli Google: Semaforo calcolerà quanto versare ogni settimana. Nel frattempo, qui sotto trovi lo stato del mercato.</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="openSettings()">Configura profilo</button>
+        <a class="btn btn-secondary" href="templates/registro_template.csv" download>Scarica template registro</a>
+        <a class="btn btn-secondary" href="templates/profilo_template.csv" download>Scarica template profilo</a>
+      </div>
+    </section>
+
+    <!-- Errore fogli Google -->
+    <section id="sheet-error" class="hide" style="margin-bottom:40px;max-width:760px">
+      <h6 class="kicker accent" style="margin-bottom:10px">La tua settimana · <span id="err-date"></span></h6>
+      <div style="font-family:var(--font-h);font-weight:600;font-size:25px;letter-spacing:-.015em;margin-bottom:5px">Non riesco a leggere il tuo foglio Google</div>
+      <div id="err-detail" class="mut2" style="font-size:15px;line-height:1.55;margin-bottom:15px;max-width:680px"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" onclick="location.reload()">Riprova</button>
+        <button class="btn btn-secondary" onclick="openSettings()">Controlla i link</button>
+      </div>
+    </section>
+
+    <!-- A. La tua settimana -->
+    <section id="decision" class="dec-grid hide">
+      <div>
+        <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:15px;flex-wrap:wrap">
+          <h6 class="kicker accent">La tua settimana · <span id="dec-date"></span></h6>
+          <div id="dec-change" class="num" style="font-size:13px;color:var(--n600)"></div>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+          <span id="dec-amount" class="amount num" style="font-family:var(--font-h);font-weight:600;font-size:76px;letter-spacing:-.015em;line-height:1">—</span>
+          <span id="dec-etf" style="font-family:var(--font-h);font-weight:600;font-size:30px;color:var(--n700)"></span>
+        </div>
+        <div id="dec-motivation" class="italic" style="font-size:17px;line-height:1.55;margin:15px 0 5px;max-width:600px"></div>
+        <div id="dec-formula" class="mut num" style="font-size:13px"></div>
+      </div>
+      <div style="padding-top:34px">
+        <div class="side-row"><span class="mut2">Serbatoio</span><span id="side-serb" style="font-family:var(--font-h);font-weight:600" class="num"></span></div>
+        <div class="side-row"><span class="mut2">Fase</span><span id="side-fase" style="font-family:var(--font-h);font-weight:600"></span></div>
+        <div style="padding:8px 0 14px">
+          <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px"><span class="mut2">Piano investito</span><span id="side-pct" style="font-family:var(--font-h);font-weight:600" class="num"></span></div>
+          <div style="height:6px;border-radius:var(--r-sm);background:var(--n200);overflow:hidden"><div id="side-bar" style="width:0;height:100%;background:var(--color-text)"></div></div>
+        </div>
+        <a id="btn-register" class="btn btn-primary btn-block" href="#" target="_blank" rel="noopener">Registra versamento ↗</a>
+      </div>
+    </section>
+
+    <!-- Sintesi -->
+    <section style="max-width:820px;margin-bottom:20px">
+      <h6 class="kicker muted" style="margin-bottom:5px">Stato del mercato</h6>
+      <div id="synth" class="italic" style="font-size:17px;line-height:1.5"></div>
+    </section>
+
+    <!-- B. I due indicatori -->
+    <section class="ind-grid">
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <h6 class="kicker">Rischio — il mercato è sano?</h6>
+          <span id="risk-tag" class="tag"></span>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <div id="risk-score" class="score num" style="font-family:var(--font-h);font-weight:600;font-size:52px;letter-spacing:-.015em;line-height:1.1">—</div>
+          <div class="mut" style="font-size:15px">/100</div>
+          <div id="risk-note" class="italic mut2" style="font-size:13px;margin-left:auto"></div>
+        </div>
+        <div style="position:relative;height:8px;border-radius:var(--r-sm);overflow:hidden;display:flex;margin:15px 0 5px">
+          <div id="band-r" style="background:var(--sem-rosso-tint)"></div><div id="band-g" style="background:var(--sem-giallo-tint)"></div><div id="band-v" style="flex:1;background:var(--sem-verde-tint)"></div>
+          <div id="risk-needle" style="position:absolute;top:-2px;bottom:-2px;width:3px;background:var(--color-text)"></div>
+        </div>
+        <div id="risk-scale" class="mut num" style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:20px"></div>
+        <details class="sec" open>
+          <summary><h6 class="kicker muted">Componenti</h6><span class="tog">Comprimi</span></summary>
+          <div id="risk-comps"></div>
+        </details>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <h6 class="kicker">Opportunità — conviene comprare?</h6>
+          <span id="opp-tag" class="tag"></span>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <div id="opp-score" class="score num" style="font-family:var(--font-h);font-weight:600;font-size:52px;letter-spacing:-.015em;line-height:1.1">—</div>
+          <div class="mut" style="font-size:15px">/100</div>
+        </div>
+        <div id="opp-levels" style="display:grid;grid-template-columns:1fr 1fr 1fr 1.3fr;gap:5px;margin:15px 0 5px"></div>
+        <div class="mut" style="font-size:11px;margin-bottom:20px">Scala a 4 livelli: da caro (tenue) a fortemente interessante (pieno)</div>
+        <details class="sec" open>
+          <summary><h6 class="kicker muted">Componenti</h6><span class="tog">Comprimi</span></summary>
+          <div id="opp-comps"></div>
+        </details>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:15px;flex-wrap:wrap;gap:8px">
+          <span id="ew-badge" class="tag"></span>
+          <div class="mut2 num" style="font-size:13px">Fear &amp; Greed: <span id="fg" style="font-family:var(--font-h);font-weight:600;color:var(--color-text)"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- C. Storico -->
+    <section style="margin-bottom:50px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;flex-wrap:wrap;gap:10px">
+        <h6 class="kicker">Storico <span id="ch-range-label">2005 → oggi</span></h6>
+        <div class="seg" role="group" aria-label="Intervallo storico">
+          <button data-range="1" aria-pressed="false">1A</button>
+          <button data-range="5" aria-pressed="false">5A</button>
+          <button data-range="all" aria-pressed="true">Tutto</button>
+        </div>
+      </div>
+      <div class="mut2" style="display:flex;gap:20px;font-size:12px;margin-bottom:15px;flex-wrap:wrap">
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:2px;background:var(--color-text)"></span>Punteggio rischio</span>
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:2px;background:var(--chart-opp)"></span>Punteggio opportunità</span>
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:10px;background:linear-gradient(var(--sem-verde-tint) 33%,var(--sem-giallo-tint) 33% 66%,var(--sem-rosso-tint) 66%)"></span>Fasce verde / giallo / rosso</span>
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:5px;background:var(--m700)"></span>Finestre di ingresso</span>
+      </div>
+      <svg id="chart" viewBox="0 0 1040 244" style="width:100%;display:block" role="img" aria-label="Storico del punteggio rischio e opportunità"></svg>
+      <div id="ch-note" class="mut italic" style="font-size:12px;margin-top:10px"></div>
+    </section>
+
+    <!-- D. Indicatori di dettaglio -->
+    <section style="margin-bottom:40px">
+      <details class="sec" open>
+        <summary><h6 class="kicker">Indicatori di dettaglio</h6><span class="tog">Comprimi</span></summary>
+        <div id="detail" class="grid2" style="margin-top:10px"></div>
+        <div id="detail-note" class="mut italic" style="font-size:12px;margin-top:15px"></div>
+      </details>
+    </section>
+
+    <div class="mut" style="font-size:12px">Semaforo suggerisce solo versamenti del tuo piano di accumulo — non è consulenza finanziaria.</div>
+  </div>
+
+  <!-- Impostazioni profilo -->
+  <dialog id="settings">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:25px">
+      <h3 style="margin:0;font-family:var(--font-h);font-weight:600">Impostazioni profilo</h3>
+      <button class="btn btn-secondary" style="border:none;min-height:36px" onclick="document.getElementById('settings').close()">Chiudi ✕</button>
+    </div>
+    <div style="display:grid;gap:20px">
+      <div class="field"><label for="set-name">Nome profilo</label><input id="set-name" placeholder="Matteo"></div>
+      <div class="field"><label for="set-reg">Link CSV — Registro versamenti (pubblica sul web → CSV)</label><input id="set-reg" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?output=csv"></div>
+      <div class="field"><label for="set-prof">Link CSV — Profilo (scheda Profilo pubblicata in CSV)</label><input id="set-prof" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?gid=…&output=csv"></div>
+      <div class="field"><label for="set-sheet">Link al foglio Google (per aprirlo col bottone "Registra") — opzionale</label><input id="set-sheet" placeholder="https://docs.google.com/spreadsheets/d/…/edit"></div>
+      <div class="mut" style="font-size:12.5px;font-style:italic">Fee, capitale totale, data di inizio, ETF e pesi si modificano nella scheda <b>Profilo</b> del tuo foglio Google — qui servono solo i link. I dati restano sul tuo dispositivo e nel tuo Drive.</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:30px;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button id="set-delete" class="btn btn-secondary">Elimina profilo</button>
+        <button id="set-new" class="btn btn-secondary">Nuovo profilo</button>
+      </div>
+      <button id="set-save" class="btn btn-primary" style="padding:0 30px">Salva</button>
+    </div>
+  </dialog>
+</div>
+
+<script>
+"use strict";
+/* ================= Strategia (deve combaciare con scripts/backtest_pac.py) ================= */
+const MATRIX = {
+  verde:  {"caro":0.75,"neutrale":1.0,"interessante":1.5,"fortemente interessante":2.0},
+  giallo: {"caro":0.50,"neutrale":1.0,"interessante":1.5,"fortemente interessante":2.5},
+  rosso:  {"caro":0.50,"neutrale":0.5,"interessante":1.0,"fortemente interessante":1.5},
+};
+const ENTRY_MULT = {"interessante":3.0,"fortemente interessante":4.0};
+const EQUITY_BLOCKS = ["azionario_globale","equal_weight","small_cap"];
+
+const fmtEUR = v => "€" + Math.round(v).toLocaleString("it-IT");
+const fmtN = (v,d=1) => v==null ? "—" : v.toLocaleString("it-IT",{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtDate = iso => { const [y,m,d]=iso.split("-"); return `${d}/${m}/${y}`; };
+const MONTHS = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+const fmtLong = iso => { const [y,m,d]=iso.split("-"); return `${+d} ${MONTHS[+m-1]} ${y}`; };
+
+function multiplierFor(risk, opp, entry){
+  if (entry && ENTRY_MULT[opp]) return ENTRY_MULT[opp];
+  return (MATRIX[risk]||{})[opp] ?? 1;
+}
+
+/* ================= Profili (localStorage: solo nome + link) ================= */
+const LS_KEY = "semaforo_profiles_v1";
+function loadStore(){ try { return JSON.parse(localStorage.getItem(LS_KEY)) || {active:null, profiles:[]}; } catch { return {active:null, profiles:[]}; } }
+function saveStore(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+let store = loadStore();
+const activeProfile = () => store.profiles.find(p => p.name === store.active) || null;
+
+/* ================= CSV ================= */
+function parseCSV(text){
+  const rows=[]; let row=[], cur="", inQ=false;
+  for (let i=0;i<text.length;i++){
+    const ch=text[i];
+    if (inQ){ if (ch==='"'){ if (text[i+1]==='"'){cur+='"';i++;} else inQ=false; } else cur+=ch; }
+    else if (ch==='"') inQ=true;
+    else if (ch===','){ row.push(cur); cur=""; }
+    else if (ch==='\n'){ row.push(cur); rows.push(row); row=[]; cur=""; }
+    else if (ch!=='\r') cur+=ch;
+  }
+  if (cur.length||row.length){ row.push(cur); rows.push(row); }
+  return rows.filter(r => r.some(c => c.trim()!==""));
+}
+
+/* ================= Stato ================= */
+let LATEST=null, HIST=null, PLAN=null, range="all";
+
+async function fetchJson(name){
+  // su Pages i dati sono accanto alla pagina; in locale un livello sopra (repo root)
+  for (const base of ["data/","../data/"]){
+    try { const r = await fetch(base+name); if (r.ok) return await r.json(); } catch {}
+  }
+  throw new Error(name+" non raggiungibile");
+}
+async function boot(){
+  try {
+    const [l,h] = await Promise.all([fetchJson("latest.json"), fetchJson("history.json")]);
+    LATEST=l; HIST=h;
+  } catch(e){
+    document.getElementById("loading").innerHTML =
+      '<div style="max-width:680px"><div style="font-family:var(--font-h);font-weight:600;font-size:25px;margin-bottom:5px">Non riesco a caricare i dati del semaforo</div>'+
+      '<div class="mut2" style="font-size:15px;margin-bottom:15px">('+e.message+') — riprova tra qualche minuto.</div>'+
+      '<button class="btn btn-primary" onclick="location.reload()">Riprova</button></div>';
+    return;
+  }
+  renderMarket();
+  document.getElementById("loading").classList.add("hide");
+  document.getElementById("app").classList.remove("hide");
+  await renderPlan();
+}
+
+/* ================= Mercato ================= */
+function riskTone(color){
+  return { verde:{t:"var(--sem-verde)",bg:"var(--sem-verde-tint)",bar:"var(--sem-verde-bar)"},
+           giallo:{t:"var(--sem-giallo)",bg:"var(--sem-giallo-tint)",bar:"var(--sem-giallo-bar)"},
+           rosso:{t:"var(--sem-rosso)",bg:"var(--sem-rosso-tint)",bar:"var(--sem-rosso-bar)"} }[color];
+}
+const OPP_ORDER = ["caro","neutrale","interessante","fortemente interessante"];
+const OPP_LV = [
+  {bg:"var(--m100)",c:"var(--m800)"},{bg:"var(--m200)",c:"var(--m800)"},
+  {bg:"var(--m300)",c:"var(--m900)"},{bg:"var(--m700)",c:"#f3f2f2"},
+];
+const COMP_NAMES = {trend:"Trend",breadth:"Ampiezza",vol:"Volatilità",credit:"Credito",macro:"Macro",
+  drawdown:"Drawdown",valuation:"Valutazioni",fear:"Paura",stabilization:"Stabilizzazione"};
+
+function staleDays(){
+  const last = new Date(LATEST.date+"T12:00:00Z");
+  return Math.floor((Date.now() - last.getTime()) / 86400000);
+}
+
+function renderMarket(){
+  const L=LATEST, r=L.risk, o=L.opportunity, th=L.thresholds;
+  document.getElementById("hdr-date").textContent = fmtDate(L.date);
+
+  const days = staleDays();
+  if (days > 4){
+    document.getElementById("stale").classList.remove("hide");
+    document.getElementById("stale-text").innerHTML =
+      `<b style="font-family:var(--font-h)">Ultimo calcolo: ${days} giorni fa</b> (${fmtDate(L.date)}) — mostro l'ultimo dato disponibile. Il suggerimento potrebbe non riflettere il mercato di oggi.`;
+  }
+  if (L.entry_window) document.getElementById("window-banner").classList.remove("hide");
+
+  // Rischio
+  const tone = riskTone(r.color);
+  const tag = document.getElementById("risk-tag");
+  tag.textContent = "● " + r.color;
+  tag.style.background = tone.bg; tag.style.color = tone.t;
+  document.getElementById("risk-score").textContent = fmtN(r.score);
+  const prev = r.color_prev_10d;
+  document.getElementById("risk-note").textContent =
+    prev && prev !== r.color ? `era ${prev} 10 sedute fa ↗` : "stabile";
+  const y = th.risk.yellow_min, g = th.risk.green_min;
+  document.getElementById("band-r").style.width = y+"%";
+  document.getElementById("band-g").style.width = (g-y)+"%";
+  document.getElementById("risk-needle").style.left = `calc(${r.score}% - 1px)`;
+  document.getElementById("risk-scale").innerHTML =
+    `<span>0 · rosso</span><span>${y} · giallo</span><span>${g} · verde</span><span>100</span>`;
+  document.getElementById("risk-comps").innerHTML = Object.entries(r.components).map(([k,c]) =>
+    compRow(COMP_NAMES[k]||k, c.weight, c.score, tone.bar)).join("");
+
+  // Opportunità
+  const li = OPP_ORDER.indexOf(o.label), lv = OPP_LV[Math.max(0,li)];
+  const otag = document.getElementById("opp-tag");
+  otag.textContent = "■ " + o.label;
+  otag.style.background = lv.bg; otag.style.color = lv.c;
+  document.getElementById("opp-score").textContent = fmtN(o.score);
+  document.getElementById("opp-levels").innerHTML = OPP_ORDER.map((name,i)=>{
+    const on = i===li, l=OPP_LV[i];
+    const label = i===3 ? "Fort. interessante" : name[0].toUpperCase()+name.slice(1);
+    return `<div style="height:32px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1;padding:0 4px;font-size:12px;font-family:var(--font-h);font-weight:${on?600:400};background:${on?l.bg:"transparent"};color:${on?l.c:"var(--n600)"};border:1px solid ${on?"var(--m400)":"var(--color-divider)"}">${label}</div>`;
+  }).join("");
+  document.getElementById("opp-comps").innerHTML = Object.entries(o.components).map(([k,c]) =>
+    compRow(COMP_NAMES[k]||k, c.weight, c.score, "var(--m500)")).join("");
+
+  const ew = document.getElementById("ew-badge");
+  ew.textContent = "Finestra di ingresso: " + (L.entry_window ? "SÌ" : "no");
+  ew.style.cssText += L.entry_window
+    ? "background:var(--m700);color:#f3f2f2;border:1px solid var(--m700)"
+    : "background:transparent;color:var(--n600);border:1px solid var(--color-divider)";
+  const fg = L.fear_greed.score;
+  document.getElementById("fg").textContent = `${fmtN(fg,0)}/100 · ${fg>=70?"avidità":fg<30?"paura":"neutro"}`;
+
+  document.getElementById("synth").textContent = synthText(r.color, o.label, L.entry_window);
+  renderChart();
+  renderDetail();
+}
+
+function compRow(name,w,score,bar){
+  return `<div class="comp-row"><div style="font-size:14px">${name}</div>`+
+    `<div class="mut num" style="font-size:11px">${Math.round(w*100)}%</div>`+
+    `<div class="bar-bg"><div class="bar-fill" style="width:${Math.max(0.5,score)}%;background:${bar}"></div></div>`+
+    `<div class="num" style="font-size:14px;font-family:var(--font-h);font-weight:600;text-align:right">${fmtN(score)}</div></div>`;
+}
+
+function synthText(risk, opp, entry){
+  if (entry) return "Mercato fragile ma in miglioramento, prezzi interessanti: i due indicatori concordano — è il momento raro in cui conviene versare di più.";
+  if (risk==="verde" && opp==="caro") return "Mercato in salute ma a prezzi cari: i due indicatori sono in tensione — si resta investiti, senza fretta di comprare.";
+  if (risk==="verde") return "Mercato in salute e prezzi non estremi: nessuna condizione particolare.";
+  if (risk==="giallo") return "Mercato in deterioramento non ancora generalizzato: si continua a versare, con prudenza.";
+  return "Mercato sotto stress: la debolezza è confermata — versamenti ridotti, il serbatoio si prepara alla finestra di ingresso.";
+}
+
+/* ================= Grafico storico ================= */
+function renderChart(){
+  const W=1040, H=244, T=10, B=210, th=LATEST.thresholds.risk;
+  const n = HIST.dates.length;
+  let i0 = 0;
+  if (range!=="all"){
+    const cut = new Date(LATEST.date+"T00:00:00Z"); cut.setUTCFullYear(cut.getUTCFullYear()-(+range));
+    const iso = cut.toISOString().slice(0,10);
+    i0 = HIST.dates.findIndex(d => d >= iso); if (i0<0) i0=0;
+  }
+  const m = n - i0;
+  const step = Math.max(1, Math.floor(m/1000));
+  const X = i => ((i-i0)/(m-1))*W;
+  const Y = s => B - (s/100)*(B-T);
+  const path = arr => {
+    let d="", started=false;
+    for (let i=i0;i<n;i+=step){
+      const v=arr[i]; if (v==null){ continue; }
+      d += (started?"L":"M") + X(i).toFixed(1) + " " + Y(v).toFixed(1); started=true;
+    }
+    return d;
+  };
+  const yG=Y(th.green_min), yY=Y(th.yellow_min);
+  let svg = `<rect class="ch-band-v" x="0" y="${T}" width="${W}" height="${yG-T}"/>`+
+    `<rect class="ch-band-g" x="0" y="${yG}" width="${W}" height="${yY-yG}"/>`+
+    `<rect class="ch-band-r" x="0" y="${yY}" width="${W}" height="${B-yY}"/>`+
+    `<text class="ch-txt" x="${W-6}" y="${yG-3}" text-anchor="end">${th.green_min}</text>`+
+    `<text class="ch-txt" x="${W-6}" y="${yY-3}" text-anchor="end">${th.yellow_min}</text>`;
+  for (const [iso,label] of [["2008-10-01","2008"],["2020-03-20","2020"],["2022-06-15","2022"]]){
+    const i = HIST.dates.findIndex(d=>d>=iso);
+    if (i>=i0) svg += `<line class="ch-marker" x1="${X(i).toFixed(1)}" x2="${X(i).toFixed(1)}" y1="14" y2="${B}"/>`+
+      `<text x="${X(i).toFixed(1)}" y="10" text-anchor="middle" font-size="11" font-weight="600" fill="var(--n700)">${label}</text>`;
+  }
+  svg += `<path class="ch-opp" d="${path(HIST.opp_score)}"/><path class="ch-risk" d="${path(HIST.risk_score)}"/>`;
+  // finestre di ingresso
+  let wStart=null, wins=0;
+  for (let i=i0;i<=n;i++){
+    const on = i<n && HIST.entry_window[i];
+    if (on && wStart==null) wStart=i;
+    if (!on && wStart!=null){
+      svg += `<rect class="ch-win" x="${X(wStart).toFixed(1)}" y="214" width="${Math.max(5, X(i-1)-X(wStart)).toFixed(1)}" height="6" rx="1"/>`;
+      wStart=null; wins++;
+    }
+  }
+  // etichette anni
+  const y0 = +HIST.dates[i0].slice(0,4), y1 = +HIST.dates[n-1].slice(0,4);
+  const every = Math.max(1, Math.ceil((y1-y0)/8));
+  for (let yy=y0; yy<=y1; yy+=every){
+    const i = HIST.dates.findIndex(d=>d>=`${yy}-01-01`);
+    if (i>=i0) svg += `<text class="ch-txt" x="${X(i).toFixed(1)}" y="240" text-anchor="middle">${yy}</text>`;
+  }
+  document.getElementById("chart").innerHTML = svg;
+  const total = HIST.entry_window.reduce((a,b)=>a+b,0);
+  document.getElementById("ch-note").textContent =
+    `Le finestre di ingresso passate (segni magenta): ${total} sedute su ~${n.toLocaleString("it-IT")} dal ${HIST.dates[0].slice(0,4)}.`;
+  document.getElementById("ch-range-label").textContent =
+    range==="all" ? `${HIST.dates[0].slice(0,4)} → oggi` : `ultimi ${range} ann${range==="1"?"o":"i"}`;
+}
+document.querySelectorAll(".seg [data-range]").forEach(b => b.addEventListener("click", () => {
+  range = b.dataset.range;
+  document.querySelectorAll(".seg [data-range]").forEach(x => x.setAttribute("aria-pressed", x===b ? "true":"false"));
+  renderChart();
+}));
+
+/* ================= Dettaglio ================= */
+function ord(p){ return `${Math.round(p)}° percentile`; }
+function renderDetail(){
+  const I = LATEST.indicators, rows=[];
+  const v=I.vix, c=I.credit, ma=I.macro, va=I.valuation, b=I.breadth;
+  rows.push(["VIX", fmtN(v.level,2), ord(v.pctile_5y)+" 5 anni"]);
+  rows.push(["VIX / VIX3M", fmtN(v.vix_vix3m,2), v.vix_vix3m<0.95?"contango sano":v.vix_vix3m<=1?"struttura piatta":"backwardation — stress"]);
+  rows.push(["Spread High Yield", fmtN(c.hy_oas,2)+"%", "percentile "+Math.round(c.oas_pctile_10y)]);
+  rows.push(["ANFCI", fmtN(c.anfci,2), c.anfci<-0.3?"condizioni distese":c.anfci<=0?"nella media":"condizioni restrittive"]);
+  rows.push(["Sahm Rule", fmtN(ma.sahm,2), ma.sahm<0.3?"nessun segnale recessivo":ma.sahm<0.5?"area di attenzione":"segnale recessivo"]);
+  rows.push(["CFNAI-MA3", fmtN(ma.cfnai_ma3,2), ma.cfnai_ma3>=0?"crescita sopra la norma":ma.cfnai_ma3>=-0.7?"crescita nella norma":"area recessiva"]);
+  rows.push(["CAPE", fmtN(va.cape,1), ord(va.cape_pctile)+" storico"]);
+  if (b) rows.push(["% S&P 500 sopra MA200", Math.round(b.pct_above_ma200)+"%", b.pct_above_ma200>=60?"ampiezza solida":b.pct_above_ma200>=40?"ampiezza media":"ampiezza debole"]);
+  for (const t of ["SPY","ACWI","QQQ","IWM","GLD","BTC-USD"]){
+    const a=I[t]; if(!a) continue;
+    const above = a.close>a.ma200, rising = a.ma200_slope_20d>0;
+    rows.push([`${t.replace("-USD","")} vs media 200gg`, above?"sopra":"sotto",
+      `media ${rising?"crescente":"calante"}${above&&rising?" — trend sano":!above&&!rising?" — trend debole":""}`]);
+  }
+  document.getElementById("detail").innerHTML = rows.map(r =>
+    `<div class="det-row"><div style="font-size:14px;flex-shrink:0">${r[0]}</div>`+
+    `<div style="text-align:right"><span class="num" style="font-size:14px;font-family:var(--font-h);font-weight:600">${r[1]}</span> <span class="mut" style="font-size:12px">${r[2]}</span></div></div>`).join("");
+  const dq = LATEST.data_quality;
+  document.getElementById("detail-note").textContent = dq.stale_series.length
+    ? `Attenzione: serie non aggiornate — ${dq.stale_series.join(", ")}.`
+    : `Dati aggiornati al ${fmtDate(LATEST.date)}, tutte le fonti fresche.`;
+}
+
+/* ================= Piano personale ================= */
+function parseProfileCSV(rows){
+  const p={etf:[]};
+  for (const r of rows.slice(1)){
+    const k=(r[0]||"").trim().toLowerCase(), val=(r[1]||"").trim();
+    if (!k) continue;
+    if (k.startsWith("etf_")){
+      const parts = val.split(";").map(s=>s.trim());
+      if (parts.length>=4 && parts[0]) p.etf.push({ticker:parts[0],isin:parts[1],block:parts[2].toLowerCase(),weight:parseFloat(parts[3].replace(",","."))||0});
+    } else p[k]=val;
+  }
+  p.fee = parseFloat((p.fee_base_settimanale||"").replace(",", ".")) || 0;
+  p.capitale = parseFloat((p.capitale_totale||"").replace(/\./g,"").replace(",", ".")) || 0;
+  p.glide = (p.glidepath||"").toUpperCase().startsWith("S");
+  p.fase = (p.fase||"accumulo").toLowerCase();
+  if (!p.fee || !p.capitale || !p.data_inizio || !p.etf.length)
+    throw new Error("scheda Profilo incompleta: servono fee_base_settimanale, capitale_totale, data_inizio e almeno un etf_1");
+  return p;
+}
+
+function parseRegister(reg, wantName){
+  const head = reg[0].map(h=>h.trim().toLowerCase());
+  const iData=head.indexOf("data"), iProf=head.indexOf("profilo"), iEtf=head.indexOf("etf"), iImp=head.findIndex(h=>h.startsWith("importo"));
+  if (iData<0||iEtf<0||iImp<0) throw new Error("registro: colonne Data/ETF/Importo non trovate");
+  const want = wantName.trim().toLowerCase();
+  const invested={}; let total=0;
+  for (const r of reg.slice(1)){
+    if ((r[r.length-1]||"").toUpperCase().includes("ESEMPIO")) continue;
+    if (iProf>=0 && (r[iProf]||"").trim() && (r[iProf]||"").trim().toLowerCase()!==want) continue;
+    const amt = parseFloat((r[iImp]||"0").replace(/\./g,"").replace(",", "."));
+    if (!isFinite(amt) || amt<=0) continue;
+    const t=(r[iEtf]||"").trim().toUpperCase();
+    invested[t]=(invested[t]||0)+amt; total+=amt;
+  }
+  return {invested, total};
+}
+
+function targetsFor(p, completamento){
+  const baseEq = p.etf.filter(e=>EQUITY_BLOCKS.includes(e.block)).reduce((a,e)=>a+e.weight,0);
+  if (!p.glide || !baseEq || baseEq>=100) return Object.fromEntries(p.etf.map(e=>[e.ticker,e.weight/100]));
+  const eqShare = 0.80 - 0.20*Math.min(1,Math.max(0,completamento));
+  const defShare = 1-eqShare, baseDef = 100-baseEq;
+  return Object.fromEntries(p.etf.map(e=>[e.ticker,
+    EQUITY_BLOCKS.includes(e.block) ? e.weight/baseEq*eqShare : e.weight/baseDef*defShare]));
+}
+
+async function renderPlan(){
+  const prof = activeProfile();
+  document.getElementById("btn-profile").textContent = (prof ? prof.name : "Nessun profilo") + " ▾";
+  const dec=document.getElementById("decision"), fv=document.getElementById("first-visit"), er=document.getElementById("sheet-error");
+  dec.classList.add("hide"); fv.classList.add("hide"); er.classList.add("hide");
+  if (!prof){ fv.classList.remove("hide"); return; }
+
+  try {
+    const [regT, profT] = await Promise.all([
+      fetch(prof.registro_csv).then(r=>{ if(!r.ok) throw new Error("registro: HTTP "+r.status); return r.text(); }),
+      fetch(prof.profilo_csv).then(r=>{ if(!r.ok) throw new Error("profilo: HTTP "+r.status); return r.text(); }),
+    ]);
+    const P = parseProfileCSV(parseCSV(profT));
+    const {invested, total} = parseRegister(parseCSV(regT), (P.profilo||prof.name));
+    PLAN = computePlan(P, invested, total);
+    fillDecision(P, PLAN, prof);
+    dec.classList.remove("hide");
+  } catch(e){
+    document.getElementById("err-date").textContent = fmtLong(LATEST.date);
+    document.getElementById("err-detail").textContent =
+      `${e.message}. Gli indicatori di mercato qui sotto restano aggiornati: puoi comunque ragionare sul versamento.`;
+    er.classList.remove("hide");
+  }
+}
+
+function computePlan(P, invested, total){
+  const start = new Date(P.data_inizio+"T00:00:00Z"), now = new Date(LATEST.date+"T00:00:00Z");
+  const weeks = Math.max(1, Math.floor((now-start)/604800000)+1);
+  const serb = Math.max(0, weeks*P.fee - total);
+  const completamento = Math.min(1, total/P.capitale);
+  const remaining = Math.max(0, P.capitale-total);
+  const mult = multiplierFor(LATEST.risk.color, LATEST.opportunity.label, LATEST.entry_window);
+  let amount = Math.min(P.fee, mult*P.fee);
+  const extra = Math.min(Math.max(0, mult*P.fee-P.fee), serb);
+  amount = Math.min(amount+extra, remaining);
+  const targets = targetsFor(P, completamento);
+  let best=P.etf[0].ticker, bestGap=-Infinity;
+  for (const e of P.etf){
+    const gap = targets[e.ticker]*(total+amount) - (invested[e.ticker]||0);
+    if (gap>bestGap){ bestGap=gap; best=e.ticker; }
+  }
+  // importo della settimana scorsa (5 sedute fa), per il confronto
+  const n=HIST.dates.length, j=Math.max(0,n-6);
+  const prevMult = multiplierFor(HIST.risk_color[j], HIST.opp_label[j], HIST.entry_window[j]);
+  const prevAmount = Math.min(P.fee,prevMult*P.fee) + Math.min(Math.max(0,prevMult*P.fee-P.fee), serb);
+  return {weeks, serb, completamento, remaining, mult, amount:Math.round(amount), extra:Math.round(extra), etf:best, prevAmount:Math.round(Math.min(prevAmount,remaining))};
+}
+
+function fillDecision(P, pl, prof){
+  document.getElementById("dec-date").textContent = fmtLong(LATEST.date);
+  const fase = P.fase;
+  document.getElementById("side-fase").textContent = fase[0].toUpperCase()+fase.slice(1);
+  document.getElementById("side-serb").textContent = pl.extra>0 ? `${fmtEUR(pl.serb)} · −${fmtEUR(pl.extra)} questa settimana` : fmtEUR(pl.serb);
+  document.getElementById("side-pct").textContent = Math.round(pl.completamento*100)+"%";
+  document.getElementById("side-bar").style.width = (pl.completamento*100)+"%";
+  const reg = document.getElementById("btn-register");
+  reg.href = prof.sheet_url || prof.registro_csv;
+
+  if (fase!=="accumulo" || pl.remaining<=0){
+    document.getElementById("dec-amount").textContent = "—";
+    document.getElementById("dec-etf").textContent = "";
+    document.getElementById("dec-motivation").textContent = pl.remaining<=0
+      ? "Piano completato: il capitale dichiarato è tutto investito. Fase di mantenimento — controlla periodicamente gli sforamenti dai pesi obiettivo."
+      : "Fase di " + fase + ": nessun versamento suggerito. Usa i pesi obiettivo per ribilanciamenti o prelievi.";
+    document.getElementById("dec-formula").textContent = "";
+    document.getElementById("dec-change").textContent = "";
+    return;
+  }
+  document.getElementById("dec-amount").textContent = fmtEUR(pl.amount);
+  document.getElementById("dec-etf").textContent = "su " + pl.etf;
+  document.getElementById("dec-motivation").textContent = motivationText(pl);
+  document.getElementById("dec-formula").textContent =
+    `Fee base ${fmtEUR(P.fee)} × moltiplicatore ${fmtN(pl.mult,pl.mult%1?2:1)}` + (pl.extra>0 ? " + serbatoio" : "");
+  const ch = document.getElementById("dec-change");
+  if (pl.amount>pl.prevAmount){ ch.textContent=`↑ da ${fmtEUR(pl.prevAmount)} della settimana scorsa`; ch.style.color="var(--m800)"; }
+  else if (pl.amount<pl.prevAmount){ ch.textContent=`↓ da ${fmtEUR(pl.prevAmount)} della settimana scorsa`; ch.style.color="var(--n600)"; }
+  else { ch.textContent="= invariato rispetto a settimana scorsa"; ch.style.color="var(--n600)"; }
+}
+
+function motivationText(pl){
+  const r=LATEST.risk.color, o=LATEST.opportunity.label;
+  if (LATEST.entry_window) return `Rischio ${r} in miglioramento e mercato a prezzi interessanti: finestra di ingresso. Versamento maggiorato${pl.extra>0?`, attinge ${fmtEUR(pl.extra)} dal serbatoio`:""}.`;
+  if (pl.mult<1) return `Rischio ${r}, ma mercato ${o}: versamento ridotto, la differenza va al serbatoio.`;
+  if (pl.mult>1) return `Prezzi ${o}: versamento maggiorato${pl.extra>0?`, attinge ${fmtEUR(pl.extra)} dal serbatoio`:""}.`;
+  return `Rischio ${r} e prezzi ${o==="neutrale"?"nella norma":o}: versamento pieno, nessuna condizione particolare.`;
+}
+
+/* ================= Impostazioni ================= */
+const dlg = document.getElementById("settings");
+function openSettings(){
+  const p = activeProfile() || {name:"",registro_csv:"",profilo_csv:"",sheet_url:""};
+  document.getElementById("set-name").value = p.name;
+  document.getElementById("set-reg").value = p.registro_csv;
+  document.getElementById("set-prof").value = p.profilo_csv;
+  document.getElementById("set-sheet").value = p.sheet_url||"";
+  dlg.showModal();
+}
+document.getElementById("btn-profile").addEventListener("click", () => {
+  if (store.profiles.length>1){
+    const i = store.profiles.findIndex(p=>p.name===store.active);
+    const next = store.profiles[(i+1)%store.profiles.length];
+    store.active = next.name; saveStore(store); renderPlan();
+  } else openSettings();
+});
+document.getElementById("btn-profile").addEventListener("dblclick", openSettings);
+document.getElementById("set-new").addEventListener("click", () => {
+  ["set-name","set-reg","set-prof","set-sheet"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("set-name").focus();
+});
+document.getElementById("set-save").addEventListener("click", () => {
+  const name=document.getElementById("set-name").value.trim();
+  const reg=document.getElementById("set-reg").value.trim();
+  const pr=document.getElementById("set-prof").value.trim();
+  if (!name||!reg||!pr){ alert("Servono nome e i due link CSV."); return; }
+  const p={name,registro_csv:reg,profilo_csv:pr,sheet_url:document.getElementById("set-sheet").value.trim()};
+  const i=store.profiles.findIndex(x=>x.name===name);
+  if (i>=0) store.profiles[i]=p; else store.profiles.push(p);
+  store.active=name; saveStore(store); dlg.close(); renderPlan();
+});
+document.getElementById("set-delete").addEventListener("click", () => {
+  const name=document.getElementById("set-name").value.trim();
+  if (!name || !confirm(`Eliminare il profilo "${name}" da questo dispositivo? (il foglio Google non viene toccato)`)) return;
+  store.profiles = store.profiles.filter(p=>p.name!==name);
+  store.active = store.profiles[0]?.name || null;
+  saveStore(store); dlg.close(); renderPlan();
+});
+
+boot();
+</script>
+</body>
+</html>

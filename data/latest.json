@@ -54,6 +54,17 @@
   "fear_greed": {
     "score": 73.0
   },
+  "thresholds": {
+    "risk": {
+      "yellow_min": 40,
+      "green_min": 65
+    },
+    "opportunity": {
+      "neutrale_min": 25,
+      "interessante_min": 50,
+      "fortemente_interessante_min": 75
+    }
+  },
   "indicators": {
     "SPY": {
       "close": 752.47,

@@ -113,6 +113,11 @@ def export(df: pd.DataFrame) -> dict:
         },
         "entry_window": bool(last["entry_window"]),
         "fear_greed": {"score": _num(last["fear_greed"], 1)},
+        "thresholds": {
+            "risk": {"yellow_min": cfg["risk"]["colors"]["yellow_min"],
+                     "green_min": cfg["risk"]["colors"]["green_min"]},
+            "opportunity": cfg["opportunity"]["labels"],
+        },
         "indicators": _indicators_block(),
         "data_quality": _data_quality(),
     }
@@ -128,6 +133,7 @@ def export(df: pd.DataFrame) -> dict:
         "opp_score": [_num(v, 1) for v in df["opp_score"]],
         "opp_label": list(df["opp_label"]),
         "fear_greed": [_num(v, 1) for v in df["fear_greed"]],
+        "entry_window": [bool(v) for v in df["entry_window"]],
     }
     with open(DATA_DIR / "history.json", "w") as f:
         json.dump(hist, f, ensure_ascii=False)
