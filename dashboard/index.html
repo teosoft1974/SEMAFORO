@@ -336,7 +336,7 @@ function parseCSV(text){
 }
 
 /* ================= Stato ================= */
-let LATEST=null, HIST=null, PLAN=null, range="all";
+let LATEST=null, HIST=null, ETFPRICES=null, PLAN=null, range="all";
 
 async function fetchJson(name){
   // su Pages i dati sono accanto alla pagina; in locale un livello sopra (repo root)
@@ -349,6 +349,7 @@ async function boot(){
   try {
     const [l,h] = await Promise.all([fetchJson("latest.json"), fetchJson("history.json")]);
     LATEST=l; HIST=h;
+    try { ETFPRICES = await fetchJson("etf_prices.json"); } catch { ETFPRICES = null; }
   } catch(e){
     document.getElementById("loading").innerHTML =
       '<div style="max-width:680px"><div style="font-family:var(--font-h);font-weight:600;font-size:25px;margin-bottom:5px">Non riesco a caricare i dati del semaforo</div>'+
@@ -649,9 +650,14 @@ async function renderPlan(){
     const P = parseProfileCSV(parseCSV(profT));
     const isinToTicker = Object.fromEntries(P.etf.filter(e=>e.isin).map(e=>[e.isin.toUpperCase(), e.ticker]));
     const {invested, total, lastPrice} = parseRegister(parseCSV(regT), (P.profilo||prof.name), isinToTicker);
-    // prezzo: colonna D del Profilo (live) > ultimo prezzo dal registro
+    // prezzo: colonna D del Profilo (live) > chiusura Yahoo di ieri (per ISIN)
+    // > ultimo prezzo annotato nel registro
     const prices = {...lastPrice};
-    for (const e of P.etf) if (e.price) prices[e.ticker] = e.price;
+    for (const e of P.etf){
+      const y = ETFPRICES && ETFPRICES.prices && e.isin && ETFPRICES.prices[e.isin.toUpperCase()];
+      if (y && y.price) prices[e.ticker] = y.price;
+      if (e.price) prices[e.ticker] = e.price;
+    }
     PLAN = computePlan(P, invested, total, prices);
     fillDecision(P, PLAN, prof);
     dec.classList.remove("hide");

@@ -10,6 +10,15 @@ tickers:
     universe: sp500          # costituenti da Wikipedia, download batch yfinance
     fallback: rsp_spy        # se il calcolo breadth fallisce, RSP/SPY assorbe il peso
 
+# Prezzi ETF pubblicati ogni sera per la dashboard (chiave: ISIN -> ticker Yahoo in EUR).
+# Servono al conteggio delle quote intere; per aggiungere un ETF basta una riga qui.
+etf_prices:
+  IE00BK5BQT80: VWCE.MI   # Vanguard FTSE All-World
+  IE00BLNMYC90: XDEW.MI   # Xtrackers S&P 500 Equal Weight
+  IE00BF4RFH31: IUSN.DE   # iShares MSCI World Small Cap
+  IE00B4ND3602: SGLN.MI   # iShares Physical Gold
+  IE00BG47KH54: VAGF.MI   # Vanguard Global Aggregate EUR Hedged
+
 fred:
   # chiave API: variabile d'ambiente FRED_API_KEY (in locale .env, su GitHub nei Secrets)
   series:

@@ -50,9 +50,24 @@ def cmd_backfill(args: argparse.Namespace) -> int:
 
 
 def cmd_run(_args: argparse.Namespace) -> int:
+    import json
+
     from . import pipeline
+    from .config import DATA_DIR as _dd
     df = pipeline.build()
     snap = pipeline.export(df)
+
+    # prezzi ETF del dossier per la dashboard: se il download fallisce si
+    # conserva il file precedente (la dashboard ha comunque i suoi fallback)
+    try:
+        from .fetch.etf_prices import fetch_etf_prices
+        mapping = load_config().get("etf_prices") or {}
+        if mapping:
+            with open(_dd / "etf_prices.json", "w") as f:
+                json.dump(fetch_etf_prices(mapping), f, ensure_ascii=False, indent=1)
+            print(f"Prezzi ETF aggiornati ({len(mapping)} ISIN)")
+    except Exception as e:  # noqa: BLE001
+        print(f"ATTENZIONE prezzi ETF non aggiornati: {e}", file=sys.stderr)
     r, o = snap["risk"], snap["opportunity"]
     print(f"Semaforo del {snap['date']}")
     print(f"  RISCHIO      {r['color'].upper()}  (score {r['score']})")
