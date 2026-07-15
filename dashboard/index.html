@@ -173,6 +173,8 @@ svg text{font-family:var(--font-b)}
         <div id="dec-motivation" class="italic" style="font-size:17px;line-height:1.55;margin:15px 0 5px;max-width:600px"></div>
         <div id="dec-formula" class="mut num" style="font-size:13px"></div>
         <div id="dec-alloc" style="max-width:420px;margin-top:15px"></div>
+        <div id="dec-leftover" class="mut num" style="font-size:13px;margin-top:8px"></div>
+        <div id="dec-alert" class="hide" style="max-width:600px;margin-top:15px;background:var(--sem-giallo-tint);border-radius:var(--r-md);padding:12px 16px;font-size:14px;line-height:1.5"></div>
       </div>
       <div style="padding-top:34px">
         <div class="side-row"><span class="mut2">Serbatoio</span><span id="side-serb" style="font-family:var(--font-h);font-weight:600" class="num"></span></div>
@@ -551,7 +553,8 @@ function parseProfileCSV(rows){
     if (!k) continue;
     if (k.startsWith("etf_")){
       const parts = val.split(";").map(s=>s.trim());
-      if (parts.length>=4 && parts[0]) p.etf.push({ticker:parts[0],isin:parts[1],block:parts[2].toLowerCase(),weight:parseFloat(parts[3].replace(",","."))||0});
+      if (parts.length>=4 && parts[0]) p.etf.push({ticker:parts[0],isin:parts[1],block:parts[2].toLowerCase(),weight:parseFloat(parts[3].replace(",","."))||0,
+        price:parseAmount(r[3])||null});  // colonna D: prezzo live (GOOGLEFINANCE), opzionale
     } else p[k]=val;
   }
   p.fee = parseAmount(p.fee_base_settimanale) || 0;
@@ -573,8 +576,9 @@ function parseRegister(reg, wantName, isinToTicker={}){
   const iData=head.indexOf("data"), iProf=head.indexOf("profilo"), iEtf=head.indexOf("etf"),
         iIsin=head.indexOf("isin"), iImp=head.findIndex(h=>h.startsWith("importo"));
   if (iData<0||iEtf<0||iImp<0) throw new Error("registro: colonne Data/ETF/Importo non trovate");
+  const iPrz=head.indexOf("prezzo");
   const want = wantName.trim().toLowerCase();
-  const invested={}; let total=0;
+  const invested={}, lastPrice={}, lastDate={}; let total=0;
   for (const r of reg.slice(1)){
     if ((r[r.length-1]||"").toUpperCase().includes("ESEMPIO")) continue;
     if (iProf>=0 && (r[iProf]||"").trim() && (r[iProf]||"").trim().toLowerCase()!==want) continue;
@@ -584,8 +588,11 @@ function parseRegister(reg, wantName, isinToTicker={}){
     const isin=(iIsin>=0 ? (r[iIsin]||"") : "").trim().toUpperCase();
     const t = isinToTicker[isin] || (r[iEtf]||"").trim().toUpperCase();
     invested[t]=(invested[t]||0)+amt; total+=amt;
+    const prz = iPrz>=0 ? parseAmount(r[iPrz]) : NaN;
+    const d = (r[iData]||"").trim();
+    if (isFinite(prz) && prz>0 && d >= (lastDate[t]||"")){ lastPrice[t]=prz; lastDate[t]=d; }
   }
-  return {invested, total};
+  return {invested, total, lastPrice};
 }
 
 function targetsFor(p, completamento){
@@ -641,8 +648,11 @@ async function renderPlan(){
     ]);
     const P = parseProfileCSV(parseCSV(profT));
     const isinToTicker = Object.fromEntries(P.etf.filter(e=>e.isin).map(e=>[e.isin.toUpperCase(), e.ticker]));
-    const {invested, total} = parseRegister(parseCSV(regT), (P.profilo||prof.name), isinToTicker);
-    PLAN = computePlan(P, invested, total);
+    const {invested, total, lastPrice} = parseRegister(parseCSV(regT), (P.profilo||prof.name), isinToTicker);
+    // prezzo: colonna D del Profilo (live) > ultimo prezzo dal registro
+    const prices = {...lastPrice};
+    for (const e of P.etf) if (e.price) prices[e.ticker] = e.price;
+    PLAN = computePlan(P, invested, total, prices);
     fillDecision(P, PLAN, prof);
     dec.classList.remove("hide");
   } catch(e){
@@ -653,7 +663,7 @@ async function renderPlan(){
   }
 }
 
-function computePlan(P, invested, total){
+function computePlan(P, invested, total, prices={}){
   const start = new Date(P.data_inizio+"T00:00:00Z"), now = new Date(LATEST.date+"T00:00:00Z");
   const weeks = Math.max(1, Math.floor((now-start)/604800000)+1);
   const serb = Math.max(0, weeks*P.fee - total);
@@ -663,25 +673,58 @@ function computePlan(P, invested, total){
   let amount = Math.min(P.fee, mult*P.fee);
   const extra = Math.min(Math.max(0, mult*P.fee-P.fee), serb);
   amount = Math.min(amount+extra, remaining);
-  const allocations = allocate(P, invested, total, Math.round(amount), completamento);
+  const {allocations, skipped, leftover} =
+    quantize(allocate(P, invested, total, Math.round(amount), completamento), prices);
   // importo della settimana scorsa (5 sedute fa), per il confronto
   const n=HIST.dates.length, j=Math.max(0,n-6);
   const prevMult = multiplierFor(HIST.risk_color[j], HIST.opp_label[j], HIST.entry_window[j]);
   const prevAmount = Math.min(P.fee,prevMult*P.fee) + Math.min(Math.max(0,prevMult*P.fee-P.fee), serb);
-  return {weeks, serb, completamento, remaining, mult, amount:Math.round(amount), extra:Math.round(extra), allocations, prevAmount:Math.round(Math.min(prevAmount,remaining))};
+  return {weeks, serb, completamento, remaining, mult, amount:Math.round(amount), extra:Math.round(extra),
+          allocations, skipped, leftover, prevAmount:Math.round(Math.min(prevAmount,remaining))};
+}
+
+/* Dove il prezzo della quota è noto, converte il riparto in quote intere:
+   arrotonda per difetto, riversa i resti sul fondo più sottopeso che può
+   permettersi un'altra quota, e segnala gli ETF per cui il budget non basta
+   nemmeno per una quota (l'avanzo matura nel serbatoio: se ne terrà conto
+   automaticamente le settimane successive). */
+function quantize({alloc, gapOrder}, prices){
+  const items = alloc.map(a => ({...a, price: prices[a.ticker] || null}));
+  let leftover = 0;
+  for (const it of items){
+    if (!it.price) continue;                       // senza prezzo: resta a importo
+    it.shares = Math.floor(it.amount / it.price);
+    leftover += it.amount - it.shares * it.price;
+    it.amount = it.shares * it.price;
+  }
+  // redistribuisci i resti su TUTTO il dossier in ordine di sottopeso: se il
+  // fondo più sottopeso è troppo caro, si ripiega su quelli abbordabili
+  const byTicker = Object.fromEntries(items.map(it=>[it.ticker,it]));
+  for (const t of gapOrder){
+    const price = prices[t];
+    if (!price || price > leftover) continue;
+    const n = Math.floor(leftover / price);
+    if (!byTicker[t]){ byTicker[t] = {ticker:t, amount:0, shares:0, price}; items.push(byTicker[t]); }
+    byTicker[t].shares += n; byTicker[t].amount += n*price; leftover -= n*price;
+  }
+  const skipped = items.filter(it => it.price && it.shares === 0)
+                       .map(it => ({ticker: it.ticker, price: it.price}));
+  return {allocations: items.filter(it => it.amount > 0.5),
+          skipped, leftover: Math.round(leftover)};
 }
 
 /* Ripartizione del versamento sul dossier: in proporzione a quanto ogni ETF è
    sotto il proprio peso obiettivo (ribilanciamento tramite versamenti); gli
    ordini sotto `ordine_minimo` vengono accorpati sui fondi più sottopeso. */
 function allocate(P, invested, total, amount, completamento){
-  if (amount<=0) return [];
+  if (amount<=0) return {alloc:[], gapOrder:[]};
   const targets = targetsFor(P, completamento);
   const gap = {}; let gapSum=0;
   for (const e of P.etf){
     gap[e.ticker] = Math.max(0, targets[e.ticker]*(total+amount) - (invested[e.ticker]||0));
     gapSum += gap[e.ticker];
   }
+  const gapOrder = P.etf.map(e=>e.ticker).sort((a,b)=>gap[b]-gap[a]);
   let alloc = P.etf.map(e => ({ticker:e.ticker,
     amount: gapSum>0 ? amount*gap[e.ticker]/gapSum : amount*targets[e.ticker]}));
   alloc.sort((a,b)=>b.amount-a.amount);
@@ -694,11 +737,11 @@ function allocate(P, invested, total, amount, completamento){
     small.forEach(a=>a.amount=0);
   }
   alloc = alloc.filter(a=>a.amount>0);
-  if (!alloc.length) return [];
+  if (!alloc.length) return {alloc:[], gapOrder};
   // arrotonda a euro interi facendo quadrare il totale sul primo
   alloc.forEach(a=>a.amount=Math.round(a.amount));
   alloc[0].amount += amount - alloc.reduce((s,a)=>s+a.amount,0);
-  return alloc.filter(a=>a.amount>0);
+  return {alloc: alloc.filter(a=>a.amount>0), gapOrder};
 }
 
 function fillDecision(P, pl, prof){
@@ -721,17 +764,32 @@ function fillDecision(P, pl, prof){
       : "Fase di " + fase + ": nessun versamento suggerito. Usa i pesi obiettivo per ribilanciamenti o prelievi.";
     document.getElementById("dec-formula").textContent = "";
     document.getElementById("dec-alloc").innerHTML = "";
+    document.getElementById("dec-leftover").textContent = "";
+    document.getElementById("dec-alert").classList.add("hide");
     document.getElementById("dec-change").textContent = "";
     return;
   }
   document.getElementById("dec-amount").textContent = fmtEUR(pl.amount);
   const single = pl.allocations.length === 1;
   document.getElementById("dec-etf").textContent =
-    single ? "su " + pl.allocations[0].ticker : "sul dossier";
-  document.getElementById("dec-alloc").innerHTML = single ? "" :
-    pl.allocations.map(a =>
-      `<div style="display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid var(--color-faint);font-size:14px">`+
-      `<span>${a.ticker}</span><span class="num" style="font-family:var(--font-h);font-weight:600">${fmtEUR(a.amount)}</span></div>`).join("");
+    pl.allocations.length === 0 ? "" : single ? "su " + pl.allocations[0].ticker : "sul dossier";
+  const row = a => {
+    const qty = a.shares ? `${a.shares} quot${a.shares===1?"a":"e"} ≈ ` : "";
+    return `<div style="display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid var(--color-faint);font-size:14px">`+
+      `<span>${a.ticker}</span><span class="num"><span class="mut2">${qty}</span><span style="font-family:var(--font-h);font-weight:600">${fmtEUR(a.amount)}</span></span></div>`;
+  };
+  document.getElementById("dec-alloc").innerHTML =
+    (single && !pl.allocations[0].shares) ? "" : pl.allocations.map(row).join("");
+  document.getElementById("dec-leftover").textContent =
+    pl.leftover >= 1 ? `${fmtEUR(pl.leftover)} restano nel serbatoio questa settimana` : "";
+  const alertBox = document.getElementById("dec-alert");
+  if (pl.skipped.length){
+    const list = pl.skipped.map(s => `<b>${s.ticker}</b> (1 quota ≈ ${fmtEUR(s.price)})`).join(", ");
+    alertBox.innerHTML = `<b style="font-family:var(--font-h);color:var(--sem-giallo)">Quota minima · </b>`+
+      `Il budget di questa settimana non basta per una quota di ${list}: la cifra va sugli altri fondi `+
+      `e la parte non investita matura nel serbatoio — questi ETF verranno ripresi appena fee e serbatoio lo consentono.`;
+    alertBox.classList.remove("hide");
+  } else alertBox.classList.add("hide");
   document.getElementById("dec-motivation").textContent = motivationText(pl);
   document.getElementById("dec-formula").textContent =
     `Fee base ${fmtEUR(P.fee)} × moltiplicatore ${fmtN(pl.mult,pl.mult%1?2:1)}` + (pl.extra>0 ? " + serbatoio" : "");
