@@ -273,10 +273,9 @@ svg text{font-family:var(--font-b)}
     </div>
     <div style="display:grid;gap:20px">
       <div class="field"><label for="set-name">Nome profilo</label><input id="set-name" placeholder="Matteo"></div>
-      <div class="field"><label for="set-reg">Link CSV — Registro versamenti (pubblica sul web → CSV)</label><input id="set-reg" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?output=csv"></div>
-      <div class="field"><label for="set-prof">Link CSV — Profilo (scheda Profilo pubblicata in CSV)</label><input id="set-prof" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?gid=…&output=csv"></div>
-      <div class="field"><label for="set-sheet">Link al foglio Google (per aprirlo col bottone "Registra") — opzionale</label><input id="set-sheet" placeholder="https://docs.google.com/spreadsheets/d/…/edit"></div>
-      <div class="mut" style="font-size:12.5px;font-style:italic">Fee, capitale totale, data di inizio, ETF e pesi si modificano nella scheda <b>Profilo</b> del tuo foglio Google — qui servono solo i link. I dati restano sul tuo dispositivo e nel tuo Drive.</div>
+      <div class="field"><label for="set-reg">Foglio Google — <b>Registro versamenti</b> (una riga per acquisto)</label><input id="set-reg" placeholder="https://docs.google.com/spreadsheets/d/…/edit"></div>
+      <div class="field"><label for="set-prof">Foglio Google — <b>Profilo</b> (fee, capitale, ETF e pesi)</label><input id="set-prof" placeholder="https://docs.google.com/spreadsheets/d/…/edit"></div>
+      <div class="mut" style="font-size:12.5px;line-height:1.6">Incolla i link dei fogli così come appaiono nella barra degli indirizzi — <b>niente da scaricare o convertire</b>. Una volta sola, per ciascun foglio: <i>Condividi → Chiunque abbia il link → Visualizzatore</i>, altrimenti questa pagina non può leggerlo. Se un foglio ha più schede, apri la scheda giusta prima di copiare il link. I tuoi dati restano nel tuo Drive e su questo dispositivo.</div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:30px;flex-wrap:wrap;gap:10px">
       <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -588,6 +587,36 @@ function targetsFor(p, completamento){
     EQUITY_BLOCKS.includes(e.block) ? e.weight/baseEq*eqShare : e.weight/baseDef*defShare]));
 }
 
+/* Da un link qualsiasi di Google Sheets (barra degli indirizzi, o link "pubblica
+   sul web") ricava gli indirizzi che restituiscono i dati in CSV. */
+function csvCandidates(url){
+  url = (url||"").trim();
+  if (!url) return [];
+  if (/output=csv/.test(url)) return [url];                    // già un link CSV pubblicato
+  const m = url.match(/\/spreadsheets\/d\/(e\/)?([A-Za-z0-9_-]+)/);
+  if (!m) return [url];
+  if (m[1]) return [url + (url.includes("?")?"&":"?") + "output=csv"];  // pubblicato senza formato
+  const id = m[2];
+  const gid = (url.match(/[#&?]gid=(\d+)/)||[])[1];
+  return [
+    `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv${gid?`&gid=${gid}`:""}`,
+    `https://docs.google.com/spreadsheets/d/${id}/export?format=csv${gid?`&gid=${gid}`:""}`,
+  ];
+}
+function sheetOpenUrl(url){
+  const m = (url||"").match(/\/spreadsheets\/d\/([A-Za-z0-9_-]+)/);
+  return (m && !url.includes("/d/e/")) ? `https://docs.google.com/spreadsheets/d/${m[1]}/edit` : null;
+}
+async function fetchCsvText(url, label){
+  for (const u of csvCandidates(url)){
+    try {
+      const r = await fetch(u);
+      if (r.ok){ const t = await r.text(); if (t && !t.trim().startsWith("<")) return t; }
+    } catch {}
+  }
+  throw new Error(`foglio "${label}" non raggiungibile — controlla il link e che il foglio sia condiviso con "Chiunque abbia il link → Visualizzatore"`);
+}
+
 async function renderPlan(){
   const prof = activeProfile();
   document.getElementById("btn-profile").textContent = (prof ? prof.name : "Nessun profilo") + " ▾";
@@ -597,8 +626,8 @@ async function renderPlan(){
 
   try {
     const [regT, profT] = await Promise.all([
-      fetch(prof.registro_csv).then(r=>{ if(!r.ok) throw new Error("registro: HTTP "+r.status); return r.text(); }),
-      fetch(prof.profilo_csv).then(r=>{ if(!r.ok) throw new Error("profilo: HTTP "+r.status); return r.text(); }),
+      fetchCsvText(prof.registro_csv, "Registro versamenti"),
+      fetchCsvText(prof.profilo_csv, "Profilo"),
     ]);
     const P = parseProfileCSV(parseCSV(profT));
     const {invested, total} = parseRegister(parseCSV(regT), (P.profilo||prof.name));
@@ -644,7 +673,9 @@ function fillDecision(P, pl, prof){
   document.getElementById("side-pct").textContent = Math.round(pl.completamento*100)+"%";
   document.getElementById("side-bar").style.width = (pl.completamento*100)+"%";
   const reg = document.getElementById("btn-register");
-  reg.href = prof.sheet_url || prof.registro_csv;
+  const openUrl = prof.sheet_url || sheetOpenUrl(prof.registro_csv);
+  if (openUrl){ reg.href = openUrl; reg.classList.remove("hide"); }
+  else reg.classList.add("hide");
 
   if (fase!=="accumulo" || pl.remaining<=0){
     document.getElementById("dec-amount").textContent = "—";
@@ -678,11 +709,10 @@ function motivationText(pl){
 /* ================= Impostazioni ================= */
 const dlg = document.getElementById("settings");
 function openSettings(){
-  const p = activeProfile() || {name:"",registro_csv:"",profilo_csv:"",sheet_url:""};
+  const p = activeProfile() || {name:"",registro_csv:"",profilo_csv:""};
   document.getElementById("set-name").value = p.name;
   document.getElementById("set-reg").value = p.registro_csv;
   document.getElementById("set-prof").value = p.profilo_csv;
-  document.getElementById("set-sheet").value = p.sheet_url||"";
   dlg.showModal();
 }
 document.getElementById("btn-profile").addEventListener("click", () => {
@@ -694,15 +724,16 @@ document.getElementById("btn-profile").addEventListener("click", () => {
 });
 document.getElementById("btn-profile").addEventListener("dblclick", openSettings);
 document.getElementById("set-new").addEventListener("click", () => {
-  ["set-name","set-reg","set-prof","set-sheet"].forEach(id=>document.getElementById(id).value="");
+  ["set-name","set-reg","set-prof"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("set-name").focus();
 });
 document.getElementById("set-save").addEventListener("click", () => {
   const name=document.getElementById("set-name").value.trim();
   const reg=document.getElementById("set-reg").value.trim();
   const pr=document.getElementById("set-prof").value.trim();
-  if (!name||!reg||!pr){ alert("Servono nome e i due link CSV."); return; }
-  const p={name,registro_csv:reg,profilo_csv:pr,sheet_url:document.getElementById("set-sheet").value.trim()};
+  if (!name||!reg||!pr){ alert("Servono il nome e i link dei due fogli Google."); return; }
+  if (!csvCandidates(reg).length||!csvCandidates(pr).length){ alert("Uno dei link non sembra un foglio Google."); return; }
+  const p={name,registro_csv:reg,profilo_csv:pr};
   const i=store.profiles.findIndex(x=>x.name===name);
   if (i>=0) store.profiles[i]=p; else store.profiles.push(p);
   store.active=name; saveStore(store); dlg.close(); renderPlan();
