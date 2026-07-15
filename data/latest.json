@@ -2,20 +2,20 @@
   "schema_version": "0.1",
   "date": "2026-07-15",
   "risk": {
-    "score": 78.4,
+    "score": 78.5,
     "color": "verde",
     "color_prev_10d": "verde",
     "components": {
       "trend": {
-        "score": 91.8,
+        "score": 92.0,
         "weight": 0.3
       },
       "breadth": {
-        "score": 65.6,
+        "score": 63.7,
         "weight": 0.2
       },
       "vol": {
-        "score": 75.8,
+        "score": 78.4,
         "weight": 0.15
       },
       "credit": {
@@ -29,7 +29,7 @@
     }
   },
   "opportunity": {
-    "score": 3.1,
+    "score": 2.8,
     "label": "caro",
     "components": {
       "drawdown": {
@@ -37,11 +37,11 @@
         "weight": 0.3
       },
       "valuation": {
-        "score": 1.6,
+        "score": 1.9,
         "weight": 0.25
       },
       "fear": {
-        "score": 13.5,
+        "score": 11.4,
         "weight": 0.2
       },
       "stabilization": {
@@ -52,7 +52,7 @@
   },
   "entry_window": false,
   "fear_greed": {
-    "score": 70.8
+    "score": 71.0
   },
   "thresholds": {
     "risk": {
@@ -67,70 +67,70 @@
   },
   "indicators": {
     "SPY": {
-      "close": 752.96,
-      "ma200": 692.53,
+      "close": 754.81,
+      "ma200": 692.54,
       "ma200_slope_20d": 0.0141,
-      "mom_12m": 0.2185,
-      "dist_52w_high": -0.0061,
+      "mom_12m": 0.2214,
+      "dist_52w_high": -0.0037,
       "trend_state": "sano"
     },
     "ACWI": {
-      "close": 157.07,
+      "close": 157.52,
       "ma200": 144.84,
       "ma200_slope_20d": 0.0158,
-      "mom_12m": 0.2326,
-      "dist_52w_high": -0.0118,
+      "mom_12m": 0.2362,
+      "dist_52w_high": -0.0089,
       "trend_state": "sano"
     },
     "QQQ": {
-      "close": 715.51,
-      "ma200": 638.46,
+      "close": 717.74,
+      "ma200": 638.47,
       "ma200_slope_20d": 0.0221,
-      "mom_12m": 0.2926,
-      "dist_52w_high": -0.04,
+      "mom_12m": 0.2966,
+      "dist_52w_high": -0.037,
       "trend_state": "sano"
     },
     "IWM": {
-      "close": 295.9,
+      "close": 295.77,
       "ma200": 261.86,
       "ma200_slope_20d": 0.0233,
-      "mom_12m": 0.3395,
-      "dist_52w_high": -0.0151,
+      "mom_12m": 0.339,
+      "dist_52w_high": -0.0156,
       "trend_state": "sano"
     },
     "GLD": {
-      "close": 371.67,
-      "ma200": 411.24,
+      "close": 372.35,
+      "ma200": 411.25,
       "ma200_slope_20d": 0.0103,
-      "mom_12m": 0.2067,
-      "dist_52w_high": -0.2505,
+      "mom_12m": 0.2089,
+      "dist_52w_high": -0.2491,
       "trend_state": "deterioramento iniziale"
     },
     "BTC-USD": {
-      "close": 65009.96,
-      "ma200": 82421.64,
+      "close": 64775.2,
+      "ma200": 82420.46,
       "ma200_slope_20d": -0.0579,
-      "mom_12m": -0.4576,
-      "dist_52w_high": -0.4789,
+      "mom_12m": -0.4595,
+      "dist_52w_high": -0.4808,
       "trend_state": "ribasso consolidato"
     },
     "ratios": {
-      "rsp_spy": 0.2829,
-      "rsp_spy_chg_60d": -0.01,
-      "iwm_spy": 0.393,
-      "iwm_spy_chg_60d": 0.0117,
-      "hyg_ief": 0.8507
+      "rsp_spy": 0.2822,
+      "rsp_spy_chg_60d": -0.0125,
+      "iwm_spy": 0.3918,
+      "iwm_spy_chg_60d": 0.0088,
+      "hyg_ief": 0.851
     },
     "breadth": {
-      "pct_above_ma200": 68.3,
-      "pct_above_ma50": 64.1
+      "pct_above_ma200": 67.3,
+      "pct_above_ma50": 62.3
     },
     "vix": {
-      "level": 16.14,
-      "pctile_5y": 30.9,
-      "vix_vix3m": 0.841,
-      "chg_5d": -0.76,
-      "chg_20d": -0.06
+      "level": 15.67,
+      "pctile_5y": 26.0,
+      "vix_vix3m": 0.829,
+      "chg_5d": -1.23,
+      "chg_20d": -0.53
     },
     "credit": {
       "hy_oas": 2.72,
@@ -145,20 +145,20 @@
       "claims_chg_13w": 0.0454,
       "claims_chg_52w": -0.0672,
       "cfnai_ma3": -0.03,
-      "t10y3m": 0.74
+      "t10y3m": 0.72
     },
     "inflation": {
       "core_pce_yoy": 0.0341,
       "core_pce_3m_ann": 0.0352,
-      "fed_funds": 3.62,
-      "real_rate": 0.0021
+      "fed_funds": 3.63,
+      "real_rate": 0.0022
     },
     "valuation": {
       "cape": 41.3685,
       "cape_pctile": 98.259,
       "earnings_yield": 2.4173,
-      "real_10y": 2.36,
-      "excess_yield": 0.0573
+      "real_10y": 2.33,
+      "excess_yield": 0.0873
     }
   },
   "data_quality": {
