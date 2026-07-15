@@ -60,6 +60,8 @@ h6.kicker{margin:0;font-family:var(--font-h);font-weight:600;font-size:13px;lett
 .italic{font-style:italic}
 .mut{color:var(--n600)} .mut2{color:var(--n700)}
 .field label{display:block;font-family:var(--font-h);font-weight:600;font-size:13px;margin-bottom:5px}
+.info{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--color-accent);color:var(--color-accent);font-size:11px;font-style:italic;text-decoration:none;vertical-align:-3px;margin-left:6px}
+.info:hover{border-color:var(--color-accent-hover);color:var(--color-accent-hover)}
 .field input{width:100%;min-height:44px;padding:0 12px;border:1px solid var(--color-divider);border-radius:var(--r-md);background:var(--color-bg);color:var(--color-text);font:inherit;font-size:14px}
 .field input:focus{outline:2px solid var(--color-accent);outline-offset:0}
 dialog{border:1px solid var(--color-divider);border-radius:4px;background:var(--color-bg);color:var(--color-text);max-width:640px;width:calc(100vw - 40px);padding:30px;box-shadow:0 12px 32px color-mix(in srgb,#000 30%,transparent)}
@@ -142,8 +144,7 @@ svg text{font-family:var(--font-b)}
       <div class="mut2" style="font-size:15px;line-height:1.55;margin-bottom:15px">Ti servono solo i link ai tuoi fogli Google: Semaforo calcolerà quanto versare ogni settimana. Nel frattempo, qui sotto trovi lo stato del mercato.</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="openSettings()">Configura profilo</button>
-        <a class="btn btn-secondary" href="templates/registro_template.csv" download>Scarica template registro</a>
-        <a class="btn btn-secondary" href="templates/profilo_template.csv" download>Scarica template profilo</a>
+        <a class="btn btn-secondary" href="guida.html" target="_blank" rel="noopener">Guida e template ↗</a>
       </div>
     </section>
 
@@ -272,10 +273,10 @@ svg text{font-family:var(--font-b)}
       <button class="btn btn-secondary" style="border:none;min-height:36px" onclick="document.getElementById('settings').close()">Chiudi ✕</button>
     </div>
     <div style="display:grid;gap:20px">
-      <div class="field"><label for="set-name">Nome profilo</label><input id="set-name" placeholder="Matteo"></div>
-      <div class="field"><label for="set-reg">Foglio Google — <b>Registro versamenti</b> (una riga per acquisto)</label><input id="set-reg" placeholder="https://docs.google.com/spreadsheets/d/…/edit"></div>
-      <div class="field"><label for="set-prof">Foglio Google — <b>Profilo</b> (fee, capitale, ETF e pesi)</label><input id="set-prof" placeholder="https://docs.google.com/spreadsheets/d/…/edit"></div>
-      <div class="mut" style="font-size:12.5px;line-height:1.6">Incolla i link dei fogli così come appaiono nella barra degli indirizzi — <b>niente da scaricare o convertire</b>. Una volta sola, per ciascun foglio: <i>Condividi → Chiunque abbia il link → Visualizzatore</i>, altrimenti questa pagina non può leggerlo. Se un foglio ha più schede, apri la scheda giusta prima di copiare il link. I tuoi dati restano nel tuo Drive e su questo dispositivo.</div>
+      <div class="field"><label for="set-name">Nome profilo<a class="info" href="guida.html#nome" target="_blank" rel="noopener" aria-label="Guida: nome profilo" title="Cos'è e come si usa">i</a></label><input id="set-name" placeholder="Matteo"></div>
+      <div class="field"><label for="set-reg">Foglio Google — <b>Registro versamenti</b> (una riga per acquisto)<a class="info" href="guida.html#registro" target="_blank" rel="noopener" aria-label="Guida: registro versamenti" title="Cos'è, colonne e template">i</a></label><input id="set-reg" placeholder="https://docs.google.com/spreadsheets/d/…/edit"></div>
+      <div class="field"><label for="set-prof">Foglio Google — <b>Profilo</b> (fee, capitale, ETF e pesi)<a class="info" href="guida.html#profilo" target="_blank" rel="noopener" aria-label="Guida: foglio profilo" title="Cos'è, chiavi e template">i</a></label><input id="set-prof" placeholder="https://docs.google.com/spreadsheets/d/…/edit"></div>
+      <div class="mut" style="font-size:12.5px;line-height:1.6">Incolla i link dei fogli così come appaiono nella barra degli indirizzi — <b>niente da scaricare o convertire</b>. Una volta sola, per ciascun foglio: <i>Condividi → Chiunque abbia il link → Visualizzatore</i><a class="info" href="guida.html#condivisione" target="_blank" rel="noopener" aria-label="Guida: condividere i fogli" title="Come condividere i fogli">i</a>, altrimenti questa pagina non può leggerlo. I tuoi dati restano nel tuo Drive e su questo dispositivo. <a href="guida.html" target="_blank" rel="noopener">Guida completa ↗</a></div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:30px;flex-wrap:wrap;gap:10px">
       <div style="display:flex;gap:10px;flex-wrap:wrap">

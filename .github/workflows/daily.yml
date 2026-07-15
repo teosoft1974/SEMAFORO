@@ -47,7 +47,7 @@ jobs:
       - name: Prepara il sito statico
         run: |
           mkdir -p _site/data _site/templates
-          cp dashboard/index.html _site/
+          cp dashboard/*.html _site/
           cp data/latest.json data/history.json _site/data/
           cp templates/*.csv _site/templates/
 

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Semaforo — Guida alla configurazione</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%231E6B3C'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --color-bg:#f3f2f2; --color-text:#201e1d; --color-accent:#0088b0; --color-accent-hover:#006786;
+  --color-divider:color-mix(in srgb, var(--color-text) 16%, transparent);
+  --color-faint:color-mix(in srgb, var(--color-text) 8%, transparent);
+  --n600:#7d7979; --n700:#605d5d; --n200:#eae7e7;
+  --sem-giallo-tint:#F5ECC9; --sem-giallo:#8A6A00;
+  --font-h:"Source Serif 4",Georgia,serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --color-bg:#1b1918; --color-text:#eceae8; --color-accent:#45b7dc; --color-accent-hover:#7fd0ea;
+    --n600:#9b9695; --n700:#b3aeac; --n200:#2c2929; --sem-giallo-tint:#35301a; --sem-giallo:#dfc06a; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--color-bg);color:var(--color-text);font-family:var(--font-h);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--color-accent)} a:hover{color:var(--color-accent-hover)}
+.wrap{max-width:760px;margin:0;padding:30px 20px 60px 60px}
+@media (max-width:840px){.wrap{padding:20px 20px 40px}}
+h1{font-weight:600;font-size:26px;letter-spacing:-.015em;margin:0}
+h2{font-weight:600;font-size:20px;letter-spacing:-.01em;margin:50px 0 10px;scroll-margin-top:20px}
+h2 .chip{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--color-accent);color:var(--color-accent);font-size:13px;font-style:italic;margin-right:8px;vertical-align:-3px}
+code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--n200);padding:1px 6px;border-radius:2px}
+ol,ul{padding-left:22px} li{margin-bottom:6px}
+.rule{height:1px;background:var(--color-text);margin:10px 0 0}
+.mut{color:var(--n600)} .mut2{color:var(--n700)}
+.callout{background:var(--sem-giallo-tint);border-radius:2px;padding:12px 16px;font-size:14px}
+.callout b{color:var(--sem-giallo)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 12px 7px 0;border-bottom:1px solid var(--color-faint);vertical-align:top}
+th{font-weight:600;font-size:13px}
+.btn{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 20px;border-radius:2px;font-weight:600;font-size:14px;text-decoration:none;border:1px solid var(--color-divider);color:var(--color-text)}
+.btn:hover{border-color:var(--color-text);color:var(--color-text)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div style="display:flex;align-items:baseline;gap:20px;flex-wrap:wrap">
+    <h1>Guida alla configurazione</h1>
+    <a href="index.html" style="font-weight:600;font-size:14px;margin-left:auto">← Torna al Semaforo</a>
+  </div>
+  <div class="rule"></div>
+
+  <p style="max-width:640px;margin-top:20px">Il Semaforo ha due parti: gli <b>indicatori di mercato</b>, uguali per tutti e senza bisogno di configurazione, e il <b>tuo piano personale</b>, che vive in due fogli Google <i>di tua proprietà</i>. Questa pagina spiega i campi del pannello "Configura profilo". Niente viene salvato su un server: i tuoi dati restano nel tuo Google Drive e su questo dispositivo.</p>
+
+  <h2 id="nome"><span class="chip">i</span>Nome profilo</h2>
+  <p>Un nome libero, per te. Serve a due cose: distinguere più piani sullo stesso dispositivo (es. "Matteo" e "Figlio" — si passa dall'uno all'altro toccando il nome in alto a destra) e, se nel registro usi la colonna <code>Profilo</code>, a leggere solo le righe che ti riguardano. Deve combaciare con il valore <code>profilo</code> del tuo foglio Profilo.</p>
+
+  <h2 id="registro"><span class="chip">i</span>Foglio Google — Registro versamenti</h2>
+  <p>È il diario dei tuoi acquisti reali: <b>una riga per ogni versamento</b>, che aggiorni tu (20 secondi a settimana). Da qui il Semaforo calcola quanto hai investito, il serbatoio e l'avanzamento del piano.</p>
+  <table>
+    <tr><th>Colonna</th><th>Cosa scrivere</th><th>Esempio</th></tr>
+    <tr><td><code>Data</code></td><td>formato AAAA-MM-GG</td><td>2026-07-17</td></tr>
+    <tr><td><code>Profilo</code></td><td>chi versa</td><td>Matteo</td></tr>
+    <tr><td><code>ETF</code></td><td>ticker dello strumento</td><td>VWCE</td></tr>
+    <tr><td><code>ISIN</code></td><td>codice ISIN</td><td>IE00BK5BQT80</td></tr>
+    <tr><td><code>Importo EUR</code></td><td>quanto hai versato davvero</td><td>100</td></tr>
+    <tr><td><code>Quote</code> e <code>Prezzo</code></td><td>dall'eseguito del broker</td><td>0,75 · 133,42</td></tr>
+    <tr><td><code>Note</code></td><td>libera</td><td>finestra di ingresso</td></tr>
+  </table>
+  <p class="mut2" style="font-size:13.5px">Non rinominare le colonne e non cambiare il formato della data: le legge un programma. La riga d'esempio marcata "ESEMPIO" viene ignorata — cancellala al primo versamento vero.</p>
+  <p><a class="btn" href="templates/registro_template.csv" download>Scarica il template del registro</a></p>
+  <p class="mut2" style="font-size:13.5px">Per trasformarlo in un foglio Google: su <a href="https://sheets.google.com" target="_blank" rel="noopener">sheets.google.com</a> crea un foglio vuoto → <i>File → Importa → Carica</i> → scegli il file scaricato → "Sostituisci foglio di lavoro".</p>
+
+  <h2 id="profilo"><span class="chip">i</span>Foglio Google — Profilo</h2>
+  <p>È la carta d'identità del tuo piano: il Semaforo la legge per calcolare il suggerimento settimanale. Una riga per chiave:</p>
+  <table>
+    <tr><th>Chiave</th><th>Significato</th></tr>
+    <tr><td><code>profilo</code></td><td>nome del profilo (uguale al campo qui sopra)</td></tr>
+    <tr><td><code>fee_base_settimanale</code></td><td>quanto versi in una settimana "normale", in EUR. Il semaforo la moltiplica: ×0,5 nei momenti peggiori, fino a ×4 nelle rare finestre di ingresso</td></tr>
+    <tr><td><code>capitale_totale</code></td><td>quanto intendi investire in totale col piano. Serve per l'avanzamento e per ridurre gradualmente il rischio man mano che il piano si completa</td></tr>
+    <tr><td><code>data_inizio</code></td><td>quando è partito il piano (AAAA-MM-GG). Da qui si calcola il serbatoio: le settimane in cui versi meno della fee accumulano la differenza</td></tr>
+    <tr><td><code>fase</code></td><td><code>accumulo</code> finché stai versando; <code>mantenimento</code> o <code>decumulo</code> quando hai finito</td></tr>
+    <tr><td><code>ordine_minimo</code></td><td>sotto questa cifra non ha senso spezzare l'ordine: si compra un solo ETF a settimana</td></tr>
+    <tr><td><code>glidepath</code></td><td><code>SI</code> = la quota azionaria obiettivo scende da 80% a 60% man mano che il piano si completa</td></tr>
+    <tr><td><code>etf_1</code> … <code>etf_5</code></td><td>il tuo dossier: <code>ticker; ISIN; blocco; peso%</code>. Blocchi validi: <code>azionario_globale</code>, <code>equal_weight</code>, <code>small_cap</code>, <code>oro</code>, <code>obbligazionario</code>. I pesi devono sommare a 100</td></tr>
+  </table>
+  <p><a class="btn" href="templates/profilo_template.csv" download>Scarica il template del profilo</a></p>
+
+  <h2 id="condivisione"><span class="chip">i</span>Condividere i fogli (obbligatorio)</h2>
+  <p>La dashboard è una pagina web senza la tua password Google: può leggere i fogli solo se sono raggiungibili con il link. Per ciascuno dei due fogli, una volta sola:</p>
+  <ol>
+    <li>Apri il foglio e premi <b>Condividi</b> (in alto a destra)</li>
+    <li>Sotto "Accesso generale" scegli <b>Chiunque abbia il link</b></li>
+    <li>Lascia il ruolo su <b>Visualizzatore</b> e chiudi</li>
+  </ol>
+  <p>Poi copia il <b>link dalla barra degli indirizzi</b> del browser e incollalo nel campo del pannello. Non serve scaricare, convertire o pubblicare nulla: il collegamento è vivo, ogni apertura della dashboard rilegge il foglio aggiornato.</p>
+  <div class="callout"><b>Riservatezza ·</b> "Chiunque abbia il link" significa che solo chi conosce quell'indirizzo (lunghissimo e non indovinabile) può <i>vedere</i> il foglio — nessuno può modificarlo e il foglio non compare nelle ricerche. Nei fogli non ci sono dati anagrafici: solo importi e ticker. Se non ti sta bene, non usare la parte "piano personale": gli indicatori di mercato funzionano comunque.</div>
+
+  <h2 id="errori"><span class="chip">i</span>Se qualcosa non funziona</h2>
+  <table>
+    <tr><th>Messaggio / sintomo</th><th>Causa e rimedio</th></tr>
+    <tr><td>"foglio non raggiungibile"</td><td>quasi sempre manca la condivisione (punto precedente), oppure il link incollato non è quello del foglio</td></tr>
+    <tr><td>"colonne Data/ETF/Importo non trovate"</td><td>le intestazioni del registro sono state rinominate: ripristina i nomi del template</td></tr>
+    <tr><td>"scheda Profilo incompleta"</td><td>nel foglio Profilo mancano <code>fee_base_settimanale</code>, <code>capitale_totale</code>, <code>data_inizio</code> o gli <code>etf_N</code></td></tr>
+    <tr><td>Importi strani o a zero</td><td>controlla il formato della data (AAAA-MM-GG) e che gli importi siano numeri; la riga "ESEMPIO" è ignorata di proposito</td></tr>
+    <tr><td>Il foglio ha più schede</td><td>apri la scheda giusta <i>prima</i> di copiare il link: l'indirizzo contiene il riferimento alla scheda</td></tr>
+  </table>
+
+  <p class="mut" style="margin-top:50px;font-size:12px">Semaforo suggerisce solo versamenti del tuo piano di accumulo — non è consulenza finanziaria.</p>
+</div>
+</body>
+</html>
