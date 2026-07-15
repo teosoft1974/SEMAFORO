@@ -553,8 +553,8 @@ function parseProfileCSV(rows){
       if (parts.length>=4 && parts[0]) p.etf.push({ticker:parts[0],isin:parts[1],block:parts[2].toLowerCase(),weight:parseFloat(parts[3].replace(",","."))||0});
     } else p[k]=val;
   }
-  p.fee = parseFloat((p.fee_base_settimanale||"").replace(",", ".")) || 0;
-  p.capitale = parseFloat((p.capitale_totale||"").replace(/\./g,"").replace(",", ".")) || 0;
+  p.fee = parseAmount(p.fee_base_settimanale) || 0;
+  p.capitale = parseAmount(p.capitale_totale) || 0;
   p.glide = (p.glidepath||"").toUpperCase().startsWith("S");
   p.fase = (p.fase||"accumulo").toLowerCase();
   if (!p.fee || !p.capitale || !p.data_inizio || !p.etf.length)
@@ -562,18 +562,25 @@ function parseProfileCSV(rows){
   return p;
 }
 
-function parseRegister(reg, wantName){
+function parseAmount(s){
+  // tollera "€ 1.234,56", spazi e simboli; formato numerico italiano
+  return parseFloat((s||"").replace(/[^\d,.-]/g,"").replace(/\./g,"").replace(",", "."));
+}
+function parseRegister(reg, wantName, isinToTicker={}){
   const head = reg[0].map(h=>h.trim().toLowerCase());
-  const iData=head.indexOf("data"), iProf=head.indexOf("profilo"), iEtf=head.indexOf("etf"), iImp=head.findIndex(h=>h.startsWith("importo"));
+  const iData=head.indexOf("data"), iProf=head.indexOf("profilo"), iEtf=head.indexOf("etf"),
+        iIsin=head.indexOf("isin"), iImp=head.findIndex(h=>h.startsWith("importo"));
   if (iData<0||iEtf<0||iImp<0) throw new Error("registro: colonne Data/ETF/Importo non trovate");
   const want = wantName.trim().toLowerCase();
   const invested={}; let total=0;
   for (const r of reg.slice(1)){
     if ((r[r.length-1]||"").toUpperCase().includes("ESEMPIO")) continue;
     if (iProf>=0 && (r[iProf]||"").trim() && (r[iProf]||"").trim().toLowerCase()!==want) continue;
-    const amt = parseFloat((r[iImp]||"0").replace(/\./g,"").replace(",", "."));
+    const amt = parseAmount(r[iImp]);
     if (!isFinite(amt) || amt<=0) continue;
-    const t=(r[iEtf]||"").trim().toUpperCase();
+    // stesso ETF, borse diverse: l'ISIN vince sul ticker
+    const isin=(iIsin>=0 ? (r[iIsin]||"") : "").trim().toUpperCase();
+    const t = isinToTicker[isin] || (r[iEtf]||"").trim().toUpperCase();
     invested[t]=(invested[t]||0)+amt; total+=amt;
   }
   return {invested, total};
@@ -631,7 +638,8 @@ async function renderPlan(){
       fetchCsvText(prof.profilo_csv, "Profilo"),
     ]);
     const P = parseProfileCSV(parseCSV(profT));
-    const {invested, total} = parseRegister(parseCSV(regT), (P.profilo||prof.name));
+    const isinToTicker = Object.fromEntries(P.etf.filter(e=>e.isin).map(e=>[e.isin.toUpperCase(), e.ticker]));
+    const {invested, total} = parseRegister(parseCSV(regT), (P.profilo||prof.name), isinToTicker);
     PLAN = computePlan(P, invested, total);
     fillDecision(P, PLAN, prof);
     dec.classList.remove("hide");
