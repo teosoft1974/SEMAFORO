@@ -172,6 +172,7 @@ svg text{font-family:var(--font-b)}
         </div>
         <div id="dec-motivation" class="italic" style="font-size:17px;line-height:1.55;margin:15px 0 5px;max-width:600px"></div>
         <div id="dec-formula" class="mut num" style="font-size:13px"></div>
+        <div id="dec-alloc" style="max-width:420px;margin-top:15px"></div>
       </div>
       <div style="padding-top:34px">
         <div class="side-row"><span class="mut2">Serbatoio</span><span id="side-serb" style="font-family:var(--font-h);font-weight:600" class="num"></span></div>
@@ -555,6 +556,7 @@ function parseProfileCSV(rows){
   }
   p.fee = parseAmount(p.fee_base_settimanale) || 0;
   p.capitale = parseAmount(p.capitale_totale) || 0;
+  p.minOrder = parseAmount(p.ordine_minimo) || 0;
   p.glide = (p.glidepath||"").toUpperCase().startsWith("S");
   p.fase = (p.fase||"accumulo").toLowerCase();
   if (!p.fee || !p.capitale || !p.data_inizio || !p.etf.length)
@@ -661,17 +663,42 @@ function computePlan(P, invested, total){
   let amount = Math.min(P.fee, mult*P.fee);
   const extra = Math.min(Math.max(0, mult*P.fee-P.fee), serb);
   amount = Math.min(amount+extra, remaining);
-  const targets = targetsFor(P, completamento);
-  let best=P.etf[0].ticker, bestGap=-Infinity;
-  for (const e of P.etf){
-    const gap = targets[e.ticker]*(total+amount) - (invested[e.ticker]||0);
-    if (gap>bestGap){ bestGap=gap; best=e.ticker; }
-  }
+  const allocations = allocate(P, invested, total, Math.round(amount), completamento);
   // importo della settimana scorsa (5 sedute fa), per il confronto
   const n=HIST.dates.length, j=Math.max(0,n-6);
   const prevMult = multiplierFor(HIST.risk_color[j], HIST.opp_label[j], HIST.entry_window[j]);
   const prevAmount = Math.min(P.fee,prevMult*P.fee) + Math.min(Math.max(0,prevMult*P.fee-P.fee), serb);
-  return {weeks, serb, completamento, remaining, mult, amount:Math.round(amount), extra:Math.round(extra), etf:best, prevAmount:Math.round(Math.min(prevAmount,remaining))};
+  return {weeks, serb, completamento, remaining, mult, amount:Math.round(amount), extra:Math.round(extra), allocations, prevAmount:Math.round(Math.min(prevAmount,remaining))};
+}
+
+/* Ripartizione del versamento sul dossier: in proporzione a quanto ogni ETF è
+   sotto il proprio peso obiettivo (ribilanciamento tramite versamenti); gli
+   ordini sotto `ordine_minimo` vengono accorpati sui fondi più sottopeso. */
+function allocate(P, invested, total, amount, completamento){
+  if (amount<=0) return [];
+  const targets = targetsFor(P, completamento);
+  const gap = {}; let gapSum=0;
+  for (const e of P.etf){
+    gap[e.ticker] = Math.max(0, targets[e.ticker]*(total+amount) - (invested[e.ticker]||0));
+    gapSum += gap[e.ticker];
+  }
+  let alloc = P.etf.map(e => ({ticker:e.ticker,
+    amount: gapSum>0 ? amount*gap[e.ticker]/gapSum : amount*targets[e.ticker]}));
+  alloc.sort((a,b)=>b.amount-a.amount);
+  // accorpa gli ordini troppo piccoli sul fondo più sottopeso
+  for (let guard=0; guard<P.etf.length; guard++){
+    const small = alloc.filter(a=>a.amount>0 && a.amount<P.minOrder);
+    const kept = alloc.filter(a=>a.amount>=P.minOrder);
+    if (!small.length || !kept.length) break;
+    kept[0].amount += small.reduce((s,a)=>s+a.amount,0);
+    small.forEach(a=>a.amount=0);
+  }
+  alloc = alloc.filter(a=>a.amount>0);
+  if (!alloc.length) return [];
+  // arrotonda a euro interi facendo quadrare il totale sul primo
+  alloc.forEach(a=>a.amount=Math.round(a.amount));
+  alloc[0].amount += amount - alloc.reduce((s,a)=>s+a.amount,0);
+  return alloc.filter(a=>a.amount>0);
 }
 
 function fillDecision(P, pl, prof){
@@ -693,11 +720,18 @@ function fillDecision(P, pl, prof){
       ? "Piano completato: il capitale dichiarato è tutto investito. Fase di mantenimento — controlla periodicamente gli sforamenti dai pesi obiettivo."
       : "Fase di " + fase + ": nessun versamento suggerito. Usa i pesi obiettivo per ribilanciamenti o prelievi.";
     document.getElementById("dec-formula").textContent = "";
+    document.getElementById("dec-alloc").innerHTML = "";
     document.getElementById("dec-change").textContent = "";
     return;
   }
   document.getElementById("dec-amount").textContent = fmtEUR(pl.amount);
-  document.getElementById("dec-etf").textContent = "su " + pl.etf;
+  const single = pl.allocations.length === 1;
+  document.getElementById("dec-etf").textContent =
+    single ? "su " + pl.allocations[0].ticker : "sul dossier";
+  document.getElementById("dec-alloc").innerHTML = single ? "" :
+    pl.allocations.map(a =>
+      `<div style="display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid var(--color-faint);font-size:14px">`+
+      `<span>${a.ticker}</span><span class="num" style="font-family:var(--font-h);font-weight:600">${fmtEUR(a.amount)}</span></div>`).join("");
   document.getElementById("dec-motivation").textContent = motivationText(pl);
   document.getElementById("dec-formula").textContent =
     `Fee base ${fmtEUR(P.fee)} × moltiplicatore ${fmtN(pl.mult,pl.mult%1?2:1)}` + (pl.extra>0 ? " + serbatoio" : "");
