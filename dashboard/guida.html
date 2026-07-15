@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Semaforo — Guida alla configurazione</title>
+<title>Semaforo — Guida</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%231E6B3C'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,11 +15,15 @@
   --color-faint:color-mix(in srgb, var(--color-text) 8%, transparent);
   --n600:#7d7979; --n700:#605d5d; --n200:#eae7e7;
   --sem-giallo-tint:#F5ECC9; --sem-giallo:#8A6A00;
+  --sem-verde:#1E6B3C; --sem-verde-tint:#DDEEE2; --sem-rosso:#B3372C; --sem-rosso-tint:#F5E0DC;
+  --m100:#fff1f4; --m700:#aa0b56; --m800:#790e3d;
   --font-h:"Source Serif 4",Georgia,serif;
 }
 @media (prefers-color-scheme: dark){
   :root{ --color-bg:#1b1918; --color-text:#eceae8; --color-accent:#45b7dc; --color-accent-hover:#7fd0ea;
-    --n600:#9b9695; --n700:#b3aeac; --n200:#2c2929; --sem-giallo-tint:#35301a; --sem-giallo:#dfc06a; }
+    --n600:#9b9695; --n700:#b3aeac; --n200:#2c2929; --sem-giallo-tint:#35301a; --sem-giallo:#dfc06a;
+    --sem-verde:#84cf9d; --sem-verde-tint:#1e3326; --sem-rosso:#e79a8e; --sem-rosso-tint:#3a211c;
+    --m100:#33151f; --m700:#c42a6d; --m800:#ff9cc0; }
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--color-bg);color:var(--color-text);font-family:var(--font-h);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
@@ -27,8 +31,9 @@ a{color:var(--color-accent)} a:hover{color:var(--color-accent-hover)}
 .wrap{max-width:760px;margin:0;padding:30px 20px 60px 60px}
 @media (max-width:840px){.wrap{padding:20px 20px 40px}}
 h1{font-weight:600;font-size:26px;letter-spacing:-.015em;margin:0}
-h2{font-weight:600;font-size:20px;letter-spacing:-.01em;margin:50px 0 10px;scroll-margin-top:20px}
-h2 .chip{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--color-accent);color:var(--color-accent);font-size:13px;font-style:italic;margin-right:8px;vertical-align:-3px}
+h2{font-weight:600;font-size:22px;letter-spacing:-.01em;margin:60px 0 5px;scroll-margin-top:20px}
+h3{font-weight:600;font-size:17px;margin:40px 0 8px;scroll-margin-top:20px}
+h3 .chip,h2 .chip{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--color-accent);color:var(--color-accent);font-size:13px;font-style:italic;margin-right:8px;vertical-align:-3px;font-weight:400}
 code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--n200);padding:1px 6px;border-radius:2px}
 ol,ul{padding-left:22px} li{margin-bottom:6px}
 .rule{height:1px;background:var(--color-text);margin:10px 0 0}
@@ -38,24 +43,137 @@ ol,ul{padding-left:22px} li{margin-bottom:6px}
 table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{text-align:left;padding:7px 12px 7px 0;border-bottom:1px solid var(--color-faint);vertical-align:top}
 th{font-weight:600;font-size:13px}
+td.num,th.num{text-align:center;font-variant-numeric:tabular-nums}
 .btn{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 20px;border-radius:2px;font-weight:600;font-size:14px;text-decoration:none;border:1px solid var(--color-divider);color:var(--color-text)}
 .btn:hover{border-color:var(--color-text);color:var(--color-text)}
+.toc{columns:2;column-gap:40px;font-size:14px;margin-top:15px}
+.toc div{break-inside:avoid;margin-bottom:4px}
+.toc b{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--n600);margin:10px 0 5px}
+@media (max-width:600px){.toc{columns:1}}
+.tagx{display:inline-block;padding:2px 8px;border-radius:2px;font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div style="display:flex;align-items:baseline;gap:20px;flex-wrap:wrap">
-    <h1>Guida alla configurazione</h1>
+    <h1>Guida</h1>
     <a href="index.html" style="font-weight:600;font-size:14px;margin-left:auto">← Torna al Semaforo</a>
   </div>
   <div class="rule"></div>
 
-  <p style="max-width:640px;margin-top:20px">Il Semaforo ha due parti: gli <b>indicatori di mercato</b>, uguali per tutti e senza bisogno di configurazione, e il <b>tuo piano personale</b>, che vive in due fogli Google <i>di tua proprietà</i>. Questa pagina spiega i campi del pannello "Configura profilo". Niente viene salvato su un server: i tuoi dati restano nel tuo Google Drive e su questo dispositivo.</p>
+  <nav class="toc">
+    <div><b>Capire la pagina</b></div>
+    <div><a href="#lettura">I due indicatori, insieme</a></div>
+    <div><a href="#settimana">La tua settimana (il suggerimento)</a></div>
+    <div><a href="#rischio">Semaforo del rischio</a></div>
+    <div><a href="#opportunita">Indicatore di opportunità</a></div>
+    <div><a href="#finestra">La finestra di ingresso</a></div>
+    <div><a href="#feargreed">Fear &amp; Greed</a></div>
+    <div><a href="#storico">Il grafico storico</a></div>
+    <div><a href="#dettaglio">Gli indicatori di dettaglio</a></div>
+    <div><a href="#fonti">Le fonti dei dati</a></div>
+    <div><b>Configurare il piano</b></div>
+    <div><a href="#nome">Nome profilo</a></div>
+    <div><a href="#registro">Foglio Registro versamenti</a></div>
+    <div><a href="#profilo">Foglio Profilo</a></div>
+    <div><a href="#condivisione">Condividere i fogli</a></div>
+    <div><a href="#errori">Se qualcosa non funziona</a></div>
+  </nav>
 
-  <h2 id="nome"><span class="chip">i</span>Nome profilo</h2>
+  <h2>Capire la pagina</h2>
+
+  <h3 id="lettura"><span class="chip">i</span>I due indicatori, insieme</h3>
+  <p>Un solo semaforo confonderebbe due situazioni opposte: un mercato sano ma carissimo e un mercato in crisi ma ormai conveniente. Per questo gli indicatori sono due, e vanno letti <b>insieme</b>:</p>
+  <ul>
+    <li><b>Rischio</b> risponde a "il mercato è sano <i>adesso</i>?" — guarda tendenze, partecipazione, stress;</li>
+    <li><b>Opportunità</b> risponde a "conviene comprare <i>a questi prezzi</i>?" — guarda ribassi, valutazioni, paura.</li>
+  </ul>
+  <p>Spesso sono in tensione (es. rischio verde + prezzi cari: si resta investiti senza fretta di comprare). La riga in corsivo "Stato del mercato" è la sintesi di questa lettura combinata. La combinazione più preziosa è rara: prezzi depressi <i>e</i> primi segnali di guarigione — la <a href="#finestra">finestra di ingresso</a>.</p>
+
+  <h3 id="settimana"><span class="chip">i</span>La tua settimana — come nasce il suggerimento</h3>
+  <p>La cifra suggerita è: <b>fee base × moltiplicatore</b>, dove la fee è quella del tuo <a href="#profilo">Profilo</a> e il moltiplicatore dipende dai due indicatori:</p>
+  <table>
+    <tr><th>Rischio ↓ / Opportunità →</th><th class="num">caro</th><th class="num">neutrale</th><th class="num">interessante</th><th class="num">fort. interessante</th></tr>
+    <tr><td><span class="tagx" style="background:var(--sem-verde-tint);color:var(--sem-verde)">verde</span></td><td class="num">0,75×</td><td class="num">1×</td><td class="num">1,5×</td><td class="num">2×</td></tr>
+    <tr><td><span class="tagx" style="background:var(--sem-giallo-tint);color:var(--sem-giallo)">giallo</span></td><td class="num">0,5×</td><td class="num">1×</td><td class="num">1,5×</td><td class="num">2,5×</td></tr>
+    <tr><td><span class="tagx" style="background:var(--sem-rosso-tint);color:var(--sem-rosso)">rosso</span></td><td class="num">0,5×</td><td class="num">0,5×</td><td class="num">1×</td><td class="num">1,5×</td></tr>
+    <tr><td><span class="tagx" style="background:var(--m100);color:var(--m800)">finestra di ingresso</span></td><td class="num">—</td><td class="num">—</td><td class="num"><b>3×</b></td><td class="num"><b>4×</b></td></tr>
+  </table>
+  <p><b>Il serbatoio.</b> Nelle settimane sotto 1× la differenza non si perde: si accantona. Nelle settimane sopra 1× l'extra si preleva <i>solo</i> dal serbatoio. Così i versamenti maggiorati delle finestre di ingresso sono già finanziati — mai vendite, mai debiti. Il principio, verificato su 21 anni di dati: <i>rallentare quando è caro per poter accelerare sui minimi</i>.</p>
+  <p><b>Quale ETF.</b> Ogni settimana si compra un solo ETF (per non spezzare l'ordine): quello più <b>sottopeso</b> rispetto ai pesi obiettivo del tuo dossier. È il "ribilanciamento tramite versamenti": il portafoglio resta bilanciato senza mai vendere. Se hai attivato il <code>glidepath</code>, i pesi obiettivo si spostano gradualmente dall'80% al 60% di azionario man mano che il piano si completa: più hai accumulato, più il portafoglio si difende da solo.</p>
+  <p><b>Piano investito</b> è la quota già versata del tuo <code>capitale_totale</code>; al 100% il piano passa in fase di mantenimento.</p>
+
+  <h3 id="rischio"><span class="chip">i</span>Semaforo del rischio — il mercato è sano?</h3>
+  <p>Punteggio 0–100 (alto = sano): <span class="tagx" style="background:var(--sem-verde-tint);color:var(--sem-verde)">verde ≥ 65</span> · <span class="tagx" style="background:var(--sem-giallo-tint);color:var(--sem-giallo)">giallo 40–64</span> · <span class="tagx" style="background:var(--sem-rosso-tint);color:var(--sem-rosso)">rosso &lt; 40</span>. Il colore cambia solo superando la soglia con margine o per più sedute di fila (anti-sfarfallio). È la media pesata di cinque componenti:</p>
+  <table>
+    <tr><th>Componente</th><th class="num">Peso</th><th>Cosa misura</th></tr>
+    <tr><td>Trend</td><td class="num">30%</td><td>prezzo vs media a 200 giorni, pendenza della media, slancio a 12 mesi e distanza dai massimi — su azionario globale, USA, tecnologia, small cap, oro e Bitcoin</td></tr>
+    <tr><td>Ampiezza</td><td class="num">20%</td><td>quanti titoli partecipano al rialzo: % dell'S&amp;P 500 sopra la propria media, equal weight vs indice, small cap vs large. Un rialzo trainato da pochi titani è più fragile</td></tr>
+    <tr><td>Volatilità</td><td class="num">15%</td><td>VIX in prospettiva storica, struttura a termine, velocità dell'aumento</td></tr>
+    <tr><td>Credito</td><td class="num">20%</td><td>lo spread delle obbligazioni speculative e le condizioni finanziarie: il mercato del credito spesso "sente" i guai prima delle borse</td></tr>
+    <tr><td>Macro</td><td class="num">15%</td><td>lavoro e ciclo economico USA: Sahm Rule, sussidi di disoccupazione, attività economica</td></tr>
+  </table>
+  <p class="mut2" style="font-size:13.5px">Se una componente non è disponibile (successe per i dati più vecchi), i pesi si ridistribuiscono automaticamente sulle altre.</p>
+
+  <h3 id="opportunita"><span class="chip">i</span>Indicatore di opportunità — conviene comprare?</h3>
+  <p>Punteggio 0–100 (alto = conveniente), quattro livelli: <b>caro</b> (&lt;25) · <b>neutrale</b> (25–49) · <b>interessante</b> (50–74) · <b>fortemente interessante</b> (≥75). Componenti:</p>
+  <table>
+    <tr><th>Componente</th><th class="num">Peso</th><th>Cosa misura</th></tr>
+    <tr><td>Drawdown</td><td class="num">30%</td><td>quanto il mercato è sceso dai massimi degli ultimi 12 mesi: da −5% in giù comincia a contare, a −30% vale il massimo</td></tr>
+    <tr><td>Valutazioni</td><td class="num">25%</td><td>il CAPE di Shiller rispetto alla sua storia dal 1950, e il rendimento degli utili confrontato coi Treasury reali. Predice i rendimenti di lungo periodo, non il mese prossimo</td></tr>
+    <tr><td>Paura</td><td class="num">20%</td><td>capitolazione: VIX estremo, struttura a termine invertita, spread del credito esplosi. Il panico altrui è lo sconto di chi compra</td></tr>
+    <tr><td>Stabilizzazione</td><td class="num">25%</td><td>dopo un ribasso ≥15%: il prezzo ha recuperato la media a 50 giorni? il VIX e gli spread stanno rientrando? Distingue "sta ancora cadendo" da "si sta riprendendo"</td></tr>
+  </table>
+
+  <h3 id="finestra"><span class="chip">i</span>La finestra di ingresso</h3>
+  <p>Scatta quando <b>l'opportunità è almeno "interessante" e il colore del rischio sta migliorando</b> rispetto a due settimane prima (tipicamente da rosso a giallo): prezzi depressi <i>più</i> primi segnali di guarigione. Non è "il minimo esatto" — è la configurazione in cui, storicamente, versare di più ha reso di più.</p>
+  <p>È volutamente rara: <b>22 sedute su ~5.400 dal 2005</b>, concentrate nel 2009, 2011, 2020 e 2022 (i segni magenta nel grafico storico). Quando si accende, il moltiplicatore sale a 3–4× attingendo al serbatoio. Se non si accende per anni, è normale: significa che il mercato non ha offerto sconti seri.</p>
+
+  <h3 id="feargreed"><span class="chip">i</span>Fear &amp; Greed</h3>
+  <p>Un termometro del sentiment da 0 (paura) a 100 (avidità), calcolato in casa e trasparente — non l'indice di un editore esterno. Composizione: 25% volatilità e struttura a termine, 25% ampiezza, 25% credito, 10% momentum (i pesi si rinormalizzano sulle parti disponibili). È informativo: non entra nel calcolo del suggerimento settimanale. Paura estrema spesso accompagna le opportunità; avidità estrema invita alla calma.</p>
+
+  <h3 id="storico"><span class="chip">i</span>Il grafico storico</h3>
+  <p>Mostra il Semaforo "com'era" ogni giorno dal 2005 — calcolato con i soli dati noti in ciascun momento, senza senno di poi:</p>
+  <ul>
+    <li><b>linea scura</b>: punteggio del rischio; <b>linea magenta</b>: punteggio dell'opportunità (spesso si muovono a specchio: i crolli alzano l'opportunità);</li>
+    <li><b>fasce di sfondo</b>: le zone verde/giallo/rosso con le soglie reali (40 e 65);</li>
+    <li><b>linee tratteggiate</b>: le tre grandi crisi — 2008, 2020, 2022;</li>
+    <li><b>segni magenta in basso</b>: le finestre di ingresso passate;</li>
+    <li><b>1A / 5A / Tutto</b>: restringe l'intervallo temporale.</li>
+  </ul>
+  <p>A cosa serve: verificare con i propri occhi come il sistema si è comportato quando contava — il rosso su Lehman e sul COVID, e le finestre accese solo sui grandi minimi.</p>
+
+  <h3 id="dettaglio"><span class="chip">i</span>Gli indicatori di dettaglio</h3>
+  <p>I numeri grezzi dietro ai punteggi, per chi vuole vederci dentro:</p>
+  <table>
+    <tr><th>Indicatore</th><th>Cosa misura</th><th>Fonte</th></tr>
+    <tr><td>VIX</td><td>volatilità attesa a 30 giorni ricavata dalle opzioni sull'S&amp;P 500 ("l'indice della paura"); il percentile lo confronta con gli ultimi 5 anni</td><td>CBOE, via Yahoo Finance</td></tr>
+    <tr><td>VIX / VIX3M</td><td>volatilità a 1 mese vs 3 mesi: sotto 1 è la norma (contango); sopra 1 (backwardation) il mercato teme l'immediato — segnale di stress</td><td>CBOE, via Yahoo Finance</td></tr>
+    <tr><td>Spread High Yield</td><td>l'extra-rendimento richiesto per prestare a società rischiose: quando si allarga in fretta, il credito vede guai in arrivo</td><td>ICE BofA / FRED (<code>BAMLH0A0HYM2</code>)</td></tr>
+    <tr><td>ANFCI</td><td>indice delle condizioni finanziarie della Fed di Chicago: sopra 0 = più restrittive della media storica</td><td>FRED (<code>ANFCI</code>)</td></tr>
+    <tr><td>Sahm Rule</td><td>regola empirica sulla disoccupazione: a 0,50 punti segnala recessione già iniziata; è tra i segnali più affidabili mai trovati</td><td>FRED (<code>SAHMREALTIME</code>)</td></tr>
+    <tr><td>CFNAI-MA3</td><td>sintesi di ~85 dati sull'attività economica USA (media 3 mesi): sotto −0,7 è zona recessiva</td><td>Fed di Chicago / FRED</td></tr>
+    <tr><td>CAPE</td><td>prezzo/utili aggiustato per il ciclo (utili medi di 10 anni): la misura classica di quanto la borsa è cara; il percentile la confronta con la storia dal 1950</td><td>Robert Shiller (Yale / shillerdata.com)</td></tr>
+    <tr><td>% S&amp;P 500 sopra MA200</td><td>quanti dei 500 titoli sono sopra la propria media a 200 giorni: misura l'ampiezza reale del rialzo</td><td>calcolata sui costituenti (Wikipedia + Yahoo Finance)</td></tr>
+    <tr><td>SPY, ACWI, QQQ, IWM, GLD, BTC vs media 200gg</td><td>lo stato del trend dei sei mercati seguiti: sopra/sotto la media a 200 giorni e pendenza della media. "Sopra con media crescente" = trend sano; "sotto con media calante" = ribasso consolidato</td><td>Yahoo Finance</td></tr>
+  </table>
+
+  <h3 id="fonti"><span class="chip">i</span>Le fonti dei dati e l'aggiornamento</h3>
+  <ul>
+    <li><b>Prezzi</b> (ETF, indici di volatilità, Bitcoin): Yahoo Finance, chiusure giornaliere dal 2005;</li>
+    <li><b>Serie economiche</b> (credito, lavoro, ciclo, condizioni finanziarie): FRED, l'archivio ufficiale della Federal Reserve di St. Louis;</li>
+    <li><b>Valutazioni</b>: la serie storica di Robert Shiller (dal 1871);</li>
+    <li><b>Costituenti S&amp;P 500</b>: Wikipedia.</li>
+  </ul>
+  <p>Il calcolo gira automaticamente <b>ogni sera di borsa</b> (~23:45 italiane) su GitHub Actions; la data dell'ultimo aggiornamento è in alto a destra, e un avviso compare se i dati non sono freschi. Tutto il codice — formule, pesi, soglie — è open source: <a href="https://github.com/teosoft1974/SEMAFORO" target="_blank" rel="noopener">github.com/teosoft1974/SEMAFORO</a>.</p>
+
+  <h2>Configurare il piano</h2>
+  <p style="max-width:640px">Il piano personale vive in due fogli Google <i>di tua proprietà</i>. Niente viene salvato su un server: i tuoi dati restano nel tuo Google Drive e su questo dispositivo.</p>
+
+  <h3 id="nome"><span class="chip">i</span>Nome profilo</h3>
   <p>Un nome libero, per te. Serve a due cose: distinguere più piani sullo stesso dispositivo (es. "Matteo" e "Figlio" — si passa dall'uno all'altro toccando il nome in alto a destra) e, se nel registro usi la colonna <code>Profilo</code>, a leggere solo le righe che ti riguardano. Deve combaciare con il valore <code>profilo</code> del tuo foglio Profilo.</p>
 
-  <h2 id="registro"><span class="chip">i</span>Foglio Google — Registro versamenti</h2>
+  <h3 id="registro"><span class="chip">i</span>Foglio Google — Registro versamenti</h3>
   <p>È il diario dei tuoi acquisti reali: <b>una riga per ogni versamento</b>, che aggiorni tu (20 secondi a settimana). Da qui il Semaforo calcola quanto hai investito, il serbatoio e l'avanzamento del piano.</p>
   <table>
     <tr><th>Colonna</th><th>Cosa scrivere</th><th>Esempio</th></tr>
@@ -71,14 +189,14 @@ th{font-weight:600;font-size:13px}
   <p><a class="btn" href="templates/registro_template.csv" download>Scarica il template del registro</a></p>
   <p class="mut2" style="font-size:13.5px">Per trasformarlo in un foglio Google: su <a href="https://sheets.google.com" target="_blank" rel="noopener">sheets.google.com</a> crea un foglio vuoto → <i>File → Importa → Carica</i> → scegli il file scaricato → "Sostituisci foglio di lavoro".</p>
 
-  <h2 id="profilo"><span class="chip">i</span>Foglio Google — Profilo</h2>
+  <h3 id="profilo"><span class="chip">i</span>Foglio Google — Profilo</h3>
   <p>È la carta d'identità del tuo piano: il Semaforo la legge per calcolare il suggerimento settimanale. Una riga per chiave:</p>
   <table>
     <tr><th>Chiave</th><th>Significato</th></tr>
     <tr><td><code>profilo</code></td><td>nome del profilo (uguale al campo qui sopra)</td></tr>
-    <tr><td><code>fee_base_settimanale</code></td><td>quanto versi in una settimana "normale", in EUR. Il semaforo la moltiplica: ×0,5 nei momenti peggiori, fino a ×4 nelle rare finestre di ingresso</td></tr>
-    <tr><td><code>capitale_totale</code></td><td>quanto intendi investire in totale col piano. Serve per l'avanzamento e per ridurre gradualmente il rischio man mano che il piano si completa</td></tr>
-    <tr><td><code>data_inizio</code></td><td>quando è partito il piano (AAAA-MM-GG). Da qui si calcola il serbatoio: le settimane in cui versi meno della fee accumulano la differenza</td></tr>
+    <tr><td><code>fee_base_settimanale</code></td><td>quanto versi in una settimana "normale", in EUR. Il semaforo la moltiplica secondo la <a href="#settimana">matrice</a></td></tr>
+    <tr><td><code>capitale_totale</code></td><td>quanto intendi investire in totale col piano. Serve per l'avanzamento e per il glidepath</td></tr>
+    <tr><td><code>data_inizio</code></td><td>quando è partito il piano (AAAA-MM-GG). Da qui si calcola il serbatoio</td></tr>
     <tr><td><code>fase</code></td><td><code>accumulo</code> finché stai versando; <code>mantenimento</code> o <code>decumulo</code> quando hai finito</td></tr>
     <tr><td><code>ordine_minimo</code></td><td>sotto questa cifra non ha senso spezzare l'ordine: si compra un solo ETF a settimana</td></tr>
     <tr><td><code>glidepath</code></td><td><code>SI</code> = la quota azionaria obiettivo scende da 80% a 60% man mano che il piano si completa</td></tr>
@@ -86,7 +204,7 @@ th{font-weight:600;font-size:13px}
   </table>
   <p><a class="btn" href="templates/profilo_template.csv" download>Scarica il template del profilo</a></p>
 
-  <h2 id="condivisione"><span class="chip">i</span>Condividere i fogli (obbligatorio)</h2>
+  <h3 id="condivisione"><span class="chip">i</span>Condividere i fogli (obbligatorio)</h3>
   <p>La dashboard è una pagina web senza la tua password Google: può leggere i fogli solo se sono raggiungibili con il link. Per ciascuno dei due fogli, una volta sola:</p>
   <ol>
     <li>Apri il foglio e premi <b>Condividi</b> (in alto a destra)</li>
@@ -96,7 +214,7 @@ th{font-weight:600;font-size:13px}
   <p>Poi copia il <b>link dalla barra degli indirizzi</b> del browser e incollalo nel campo del pannello. Non serve scaricare, convertire o pubblicare nulla: il collegamento è vivo, ogni apertura della dashboard rilegge il foglio aggiornato.</p>
   <div class="callout"><b>Riservatezza ·</b> "Chiunque abbia il link" significa che solo chi conosce quell'indirizzo (lunghissimo e non indovinabile) può <i>vedere</i> il foglio — nessuno può modificarlo e il foglio non compare nelle ricerche. Nei fogli non ci sono dati anagrafici: solo importi e ticker. Se non ti sta bene, non usare la parte "piano personale": gli indicatori di mercato funzionano comunque.</div>
 
-  <h2 id="errori"><span class="chip">i</span>Se qualcosa non funziona</h2>
+  <h3 id="errori"><span class="chip">i</span>Se qualcosa non funziona</h3>
   <table>
     <tr><th>Messaggio / sintomo</th><th>Causa e rimedio</th></tr>
     <tr><td>"foglio non raggiungibile"</td><td>quasi sempre manca la condivisione (punto precedente), oppure il link incollato non è quello del foglio</td></tr>

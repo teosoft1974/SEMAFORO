@@ -163,7 +163,7 @@ svg text{font-family:var(--font-b)}
     <section id="decision" class="dec-grid hide">
       <div>
         <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:15px;flex-wrap:wrap">
-          <h6 class="kicker accent">La tua settimana · <span id="dec-date"></span></h6>
+          <h6 class="kicker accent">La tua settimana · <span id="dec-date"></span><a class="info" href="guida.html#settimana" target="_blank" rel="noopener" aria-label="Guida: come nasce il suggerimento" title="Come nasce il suggerimento">i</a></h6>
           <div id="dec-change" class="num" style="font-size:13px;color:var(--n600)"></div>
         </div>
         <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
@@ -186,7 +186,7 @@ svg text{font-family:var(--font-b)}
 
     <!-- Sintesi -->
     <section style="max-width:820px;margin-bottom:20px">
-      <h6 class="kicker muted" style="margin-bottom:5px">Stato del mercato</h6>
+      <h6 class="kicker muted" style="margin-bottom:5px">Stato del mercato<a class="info" href="guida.html#lettura" target="_blank" rel="noopener" aria-label="Guida: leggere i due indicatori" title="Come leggere i due indicatori insieme">i</a></h6>
       <div id="synth" class="italic" style="font-size:17px;line-height:1.5"></div>
     </section>
 
@@ -194,7 +194,7 @@ svg text{font-family:var(--font-b)}
     <section class="ind-grid">
       <div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <h6 class="kicker">Rischio — il mercato è sano?</h6>
+          <h6 class="kicker">Rischio — il mercato è sano?<a class="info" href="guida.html#rischio" target="_blank" rel="noopener" aria-label="Guida: semaforo del rischio" title="Componenti, soglie e colori">i</a></h6>
           <span id="risk-tag" class="tag"></span>
         </div>
         <div style="display:flex;align-items:baseline;gap:8px">
@@ -214,7 +214,7 @@ svg text{font-family:var(--font-b)}
       </div>
       <div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <h6 class="kicker">Opportunità — conviene comprare?</h6>
+          <h6 class="kicker">Opportunità — conviene comprare?<a class="info" href="guida.html#opportunita" target="_blank" rel="noopener" aria-label="Guida: indicatore di opportunità" title="Componenti e livelli">i</a></h6>
           <span id="opp-tag" class="tag"></span>
         </div>
         <div style="display:flex;align-items:baseline;gap:8px">
@@ -228,8 +228,8 @@ svg text{font-family:var(--font-b)}
           <div id="opp-comps"></div>
         </details>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:15px;flex-wrap:wrap;gap:8px">
-          <span id="ew-badge" class="tag"></span>
-          <div class="mut2 num" style="font-size:13px">Fear &amp; Greed: <span id="fg" style="font-family:var(--font-h);font-weight:600;color:var(--color-text)"></span></div>
+          <span style="display:inline-flex;align-items:center"><span id="ew-badge" class="tag"></span><a class="info" href="guida.html#finestra" target="_blank" rel="noopener" aria-label="Guida: finestra di ingresso" title="Cos'è la finestra di ingresso">i</a></span>
+          <div class="mut2 num" style="font-size:13px">Fear &amp; Greed: <span id="fg" style="font-family:var(--font-h);font-weight:600;color:var(--color-text)"></span><a class="info" href="guida.html#feargreed" target="_blank" rel="noopener" aria-label="Guida: Fear e Greed" title="Come si calcola">i</a></div>
         </div>
       </div>
     </section>
@@ -237,7 +237,7 @@ svg text{font-family:var(--font-b)}
     <!-- C. Storico -->
     <section style="margin-bottom:50px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;flex-wrap:wrap;gap:10px">
-        <h6 class="kicker">Storico <span id="ch-range-label">2005 → oggi</span></h6>
+        <h6 class="kicker">Storico <span id="ch-range-label">2005 → oggi</span><a class="info" href="guida.html#storico" target="_blank" rel="noopener" aria-label="Guida: grafico storico" title="Come leggere il grafico">i</a></h6>
         <div class="seg" role="group" aria-label="Intervallo storico">
           <button data-range="1" aria-pressed="false">1A</button>
           <button data-range="5" aria-pressed="false">5A</button>
@@ -257,13 +257,13 @@ svg text{font-family:var(--font-b)}
     <!-- D. Indicatori di dettaglio -->
     <section style="margin-bottom:40px">
       <details class="sec" open>
-        <summary><h6 class="kicker">Indicatori di dettaglio</h6><span class="tog">Comprimi</span></summary>
+        <summary><h6 class="kicker">Indicatori di dettaglio<a class="info" href="guida.html#dettaglio" target="_blank" rel="noopener" aria-label="Guida: indicatori di dettaglio" title="Cosa misura ciascun indicatore e da dove viene" onclick="event.preventDefault();event.stopPropagation();window.open(this.href,'_blank')">i</a></h6><span class="tog">Comprimi</span></summary>
         <div id="detail" class="grid2" style="margin-top:10px"></div>
         <div id="detail-note" class="mut italic" style="font-size:12px;margin-top:15px"></div>
       </details>
     </section>
 
-    <div class="mut" style="font-size:12px">Semaforo suggerisce solo versamenti del tuo piano di accumulo — non è consulenza finanziaria.</div>
+    <div class="mut" style="font-size:12px">Semaforo suggerisce solo versamenti del tuo piano di accumulo — non è consulenza finanziaria. <a href="guida.html#fonti" target="_blank" rel="noopener">Fonti dei dati ↗</a> · <a href="guida.html" target="_blank" rel="noopener">Guida ↗</a></div>
   </div>
 
   <!-- Impostazioni profilo -->
