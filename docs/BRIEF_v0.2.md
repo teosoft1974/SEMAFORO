@@ -101,8 +101,20 @@ verde 65 (non 60), importo senza effetto CMYK (scelta utente), dati veri.
 
 1. **Fase 5 — alert** su cambio colore / finestra di ingresso (email o Telegram
    dal workflow): trasforma il sistema da "da consultare" a "che ti chiama";
-2. logica di **mantenimento/decumulo** a bande nella card (oggi solo messaggio);
-3. Fase 4 — taratura fine soglie/pesi sul backtest;
-4. tooltip sul grafico storico; put/call CBOE; indicatori v0.2 del brief
+2. **Ciclo di vita del dossier** (deciso 2026-07-16, da implementare):
+   - *Sostituzione di un ETF nello stesso blocco*: la riga `etf_N` del Profilo
+     accetta **più ISIN separati da virgola** (nuovo + dismessi); gli acquisti
+     passati del vecchio ISIN si aggregano al blocco, i nuovi versamenti vanno
+     solo sul ticker corrente. Senza: il nuovo ETF appare sottopeso al 100% e
+     il blocco va in sovrappeso silenzioso (vecchia posizione ignorata);
+   - *Vendite*: righe del registro con **Importo negativo** (stesso ISIN);
+     investito netto, completamento e serbatoio si ricalcolano algebricamente.
+     Semantica proposta: ricavato non reinvestito → aumenta il serbatoio;
+   - *Cambio dei soli pesi obiettivo*: già gestito (il ribilanciamento tramite
+     versamenti converge da solo, senza vendite);
+   - documentare in guida la procedura ufficiale "come si cambia un ETF";
+3. logica di **mantenimento/decumulo** a bande nella card (oggi solo messaggio);
+4. Fase 4 — taratura fine soglie/pesi sul backtest;
+5. tooltip sul grafico storico; put/call CBOE; indicatori v0.2 del brief
    (curva dei tassi come sequenza, inflazione nei pesi);
-5. Fase 6 (opz.) — TradingView webhook per segnali intraday.
+6. Fase 6 (opz.) — TradingView webhook per segnali intraday.
