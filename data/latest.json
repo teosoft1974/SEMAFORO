@@ -1,25 +1,25 @@
 {
   "schema_version": "0.1",
-  "date": "2026-07-21",
+  "date": "2026-07-22",
   "risk": {
-    "score": 78.5,
+    "score": 79.6,
     "color": "verde",
     "color_prev_10d": "verde",
     "components": {
       "trend": {
-        "score": 91.3,
+        "score": 91.1,
         "weight": 0.3
       },
       "breadth": {
-        "score": 66.3,
+        "score": 68.2,
         "weight": 0.2
       },
       "vol": {
-        "score": 70.7,
+        "score": 73.7,
         "weight": 0.15
       },
       "credit": {
-        "score": 63.9,
+        "score": 65.6,
         "weight": 0.2
       },
       "macro": {
@@ -29,7 +29,7 @@
     }
   },
   "opportunity": {
-    "score": 4.1,
+    "score": 3.6,
     "label": "caro",
     "components": {
       "drawdown": {
@@ -37,11 +37,11 @@
         "weight": 0.3
       },
       "valuation": {
-        "score": 1.7,
+        "score": 1.5,
         "weight": 0.25
       },
       "fear": {
-        "score": 18.2,
+        "score": 16.2,
         "weight": 0.2
       },
       "stabilization": {
@@ -52,7 +52,7 @@
   },
   "entry_window": false,
   "fear_greed": {
-    "score": 69.8
+    "score": 71.7
   },
   "thresholds": {
     "risk": {
@@ -67,77 +67,77 @@
   },
   "indicators": {
     "SPY": {
-      "close": 748.28,
-      "ma200": 694.27,
-      "ma200_slope_20d": 0.0135,
-      "mom_12m": 0.2055,
-      "dist_52w_high": -0.0123,
+      "close": 747.41,
+      "ma200": 694.69,
+      "ma200_slope_20d": 0.0134,
+      "mom_12m": 0.2019,
+      "dist_52w_high": -0.0135,
       "trend_state": "sano"
     },
     "ACWI": {
-      "close": 156.29,
-      "ma200": 145.23,
-      "ma200_slope_20d": 0.0149,
-      "mom_12m": 0.2229,
-      "dist_52w_high": -0.0167,
+      "close": 156.19,
+      "ma200": 145.33,
+      "ma200_slope_20d": 0.0148,
+      "mom_12m": 0.2187,
+      "dist_52w_high": -0.0173,
       "trend_state": "sano"
     },
     "QQQ": {
-      "close": 708.97,
-      "ma200": 640.55,
-      "ma200_slope_20d": 0.0201,
-      "mom_12m": 0.2693,
-      "dist_52w_high": -0.0488,
+      "close": 705.35,
+      "ma200": 641.06,
+      "ma200_slope_20d": 0.0198,
+      "mom_12m": 0.2563,
+      "dist_52w_high": -0.0537,
       "trend_state": "sano"
     },
     "IWM": {
-      "close": 296.54,
-      "ma200": 262.95,
-      "ma200_slope_20d": 0.0227,
-      "mom_12m": 0.3476,
-      "dist_52w_high": -0.013,
+      "close": 293.79,
+      "ma200": 263.21,
+      "ma200_slope_20d": 0.0225,
+      "mom_12m": 0.3406,
+      "dist_52w_high": -0.0222,
       "trend_state": "sano"
     },
     "GLD": {
-      "close": 374.81,
-      "ma200": 411.57,
-      "ma200_slope_20d": 0.0078,
-      "mom_12m": 0.2154,
-      "dist_52w_high": -0.2442,
+      "close": 379.12,
+      "ma200": 411.69,
+      "ma200_slope_20d": 0.0075,
+      "mom_12m": 0.2107,
+      "dist_52w_high": -0.2355,
       "trend_state": "deterioramento iniziale"
     },
     "BTC-USD": {
-      "close": 66286.98,
-      "ma200": 81432.09,
-      "ma200_slope_20d": -0.0592,
-      "mom_12m": -0.4383,
-      "dist_52w_high": -0.4687,
+      "close": 65954.64,
+      "ma200": 81159.55,
+      "ma200_slope_20d": -0.0597,
+      "mom_12m": -0.4384,
+      "dist_52w_high": -0.4713,
       "trend_state": "ribasso consolidato"
     },
     "ratios": {
-      "rsp_spy": 0.2843,
-      "rsp_spy_chg_60d": -0.0037,
-      "iwm_spy": 0.3963,
-      "iwm_spy_chg_60d": 0.0188,
-      "hyg_ief": 0.8536
+      "rsp_spy": 0.2846,
+      "rsp_spy_chg_60d": 0.007,
+      "iwm_spy": 0.3931,
+      "iwm_spy_chg_60d": 0.0142,
+      "hyg_ief": 0.8541
     },
     "breadth": {
-      "pct_above_ma200": 65.9,
-      "pct_above_ma50": 60.1
+      "pct_above_ma200": 66.7,
+      "pct_above_ma50": 63.3
     },
     "vix": {
-      "level": 17.05,
-      "pctile_5y": 41.6,
-      "vix_vix3m": 0.87,
-      "chg_5d": 0.55,
-      "chg_20d": -0.23
+      "level": 16.64,
+      "pctile_5y": 37.0,
+      "vix_vix3m": 0.852,
+      "chg_5d": 0.97,
+      "chg_20d": -2.85
     },
     "credit": {
       "hy_oas": 2.69,
-      "oas_chg_20d_bp": 4.0,
+      "oas_chg_20d_bp": -2.0,
       "oas_chg_60d_bp": -17.0,
       "oas_pctile_10y": null,
-      "anfci": -0.535
+      "anfci": -0.55
     },
     "macro": {
       "sahm": 0.07,
@@ -145,7 +145,7 @@
       "claims_chg_13w": 0.0202,
       "claims_chg_52w": -0.0644,
       "cfnai_ma3": -0.03,
-      "t10y3m": 0.76
+      "t10y3m": 0.78
     },
     "inflation": {
       "core_pce_yoy": 0.0341,
@@ -157,8 +157,8 @@
       "cape": 41.3685,
       "cape_pctile": 98.259,
       "earnings_yield": 2.4173,
-      "real_10y": 2.35,
-      "excess_yield": 0.0673
+      "real_10y": 2.37,
+      "excess_yield": 0.0473
     }
   },
   "data_quality": {
