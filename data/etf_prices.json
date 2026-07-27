@@ -1,30 +1,30 @@
 {
- "updated": "2026-07-24",
+ "updated": "2026-07-27",
  "prices": {
   "IE00BK5BQT80": {
    "ticker": "VWCE.MI",
-   "price": 163.34,
-   "date": "2026-07-23"
+   "price": 164.24,
+   "date": "2026-07-24"
   },
   "IE00BLNMYC90": {
    "ticker": "XDEW.MI",
-   "price": 103.76,
-   "date": "2026-07-23"
+   "price": 104.74,
+   "date": "2026-07-24"
   },
   "IE00BF4RFH31": {
    "ticker": "IUSN.DE",
-   "price": 9.008,
-   "date": "2026-07-23"
+   "price": 9.086,
+   "date": "2026-07-24"
   },
   "IE00B4ND3602": {
    "ticker": "SGLN.MI",
-   "price": 69.44,
-   "date": "2026-07-24"
+   "price": 69.51,
+   "date": "2026-07-27"
   },
   "IE00BG47KH54": {
    "ticker": "VAGF.MI",
-   "price": 23.4,
-   "date": "2026-07-23"
+   "price": 23.52,
+   "date": "2026-07-24"
   }
  }
 }
