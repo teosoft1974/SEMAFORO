@@ -21,8 +21,11 @@ settimanali, tasse 26% sulle vendite, cassa al 2%.
 - **Dossier a 5 blocchi** (pesi obiettivo di partenza): azionario globale 45,
   S&P 500 equal weight 15, small cap 10, oro 10, obbligazionario 20 — con
   **ribilanciamento tramite versamenti** (si compra il più sottopeso, mai vendite);
-- **Glidepath sul completamento del piano**: quota azionaria obiettivo 80% → 60%
-  in funzione del *versato / capitale totale dichiarato* (non del tempo).
+- **Glidepath sul calendario** (rivisto 2026-08-26): la quota azionaria parte da
+  quella scritta nel Profilo e scende verso `azionario_finale` avvicinandosi a
+  `data_obiettivo`, con discesa che comincia `anni_discesa` prima. La versione
+  originale era legata al *completamento del piano*: sbagliata per chi versa in
+  fretta — un ingresso di 2 anni portava al 60% azionario per sempre entro due anni.
 
 **Bocciato dai numeri (non reintrodurre senza nuovi backtest):**
 - *Uscita al rosso e rientro su segnale*: 1,5× finale contro 5× del PAC fisso —
@@ -97,6 +100,31 @@ verde 65 (non 60), importo senza effetto CMYK (scelta utente), dati veri.
 - costanti della matrice duplicate in `dashboard/index.html` e
   `scripts/backtest_pac.py`: tenerle allineate a mano.
 
+## 6-bis. Piano a tranche e glidepath sul calendario (2026-08-26)
+
+Per il primo PAC reale (300.000 € in ~2 anni, orizzonte 10-20 anni, con l'intenzione
+di **aggiungere capitale in corsa**) sono emersi due limiti strutturali, entrambi risolti:
+
+- **Il serbatoio era ricostruito** come `settimane × fee − versato`. Cambiare la fee a
+  metà strada riscriveva tutto il passato (raddoppiandola dopo un anno il serbatoio
+  saltava da 39.000 a 195.000 €), e oltre la durata nominale del piano `settimane`
+  cresceva all'infinito mostrando fino a 90.000 € inesistenti. Ora il piano è una
+  **lista di tranche** (`piano_N: data; capitale; fee`), ognuna matura per conto proprio
+  col proprio tetto di capitale: aggiungere capitale non tocca le tranche precedenti.
+  Le tre chiavi storiche restano valide come tranche unica implicita;
+- **prolungamento naturale**: esaurito il calendario nominale con capitale residuo, il
+  piano prosegue all'ultimo ritmo noto. Verificato sullo storico 2005-2026 col piano
+  reale: mediana 2,2 anni per investire tutto, mai oltre 2,9 — non serve alcun tetto
+  artificiale (proposta di "paracadute" scartata);
+- **glidepath legato a `data_obiettivo`** invece che al completamento (vedi §1).
+
+Numeri di riferimento emersi dalla verifica (serie Shiller 1871-2026, rendimenti reali):
+diluire l'ingresso costa ~2% del risultato mediano a 15 anni ma batte nettamente
+l'investimento in blocco nel 1929/2000/2008; **non serve a nulla nel 1966-82**, perché il
+PAC protegge dai crolli e non dalla stagnazione — lì protegge solo l'oro in portafoglio.
+Oltre i 3 anni l'assicurazione non ripaga. Lo stato "verde + caro" (0,75×) è il più
+comune della storia (46,7% delle sedute): significa "nessun saldo", non "pericolo".
+
 ## 7. Backlog (in ordine di valore)
 
 1. **Fase 5 — alert** su cambio colore / finestra di ingresso (email o Telegram
@@ -114,6 +142,7 @@ verde 65 (non 60), importo senza effetto CMYK (scelta utente), dati veri.
      versamenti converge da solo, senza vendite);
    - documentare in guida la procedura ufficiale "come si cambia un ETF";
 3. logica di **mantenimento/decumulo** a bande nella card (oggi solo messaggio);
+   con `data_obiettivo` ora disponibile, il passaggio di fase può diventare automatico;
 4. Fase 4 — taratura fine soglie/pesi sul backtest;
 5. tooltip sul grafico storico; put/call CBOE; indicatori v0.2 del brief
    (curva dei tassi come sequenza, inflazione nei pesi);

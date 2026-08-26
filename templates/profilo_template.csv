@@ -5,9 +5,14 @@ capitale_totale,50000,EUR totali che intendi investire nel piano,
 data_inizio,2026-07-20,Formato AAAA-MM-GG,
 fase,accumulo,accumulo / mantenimento / decumulo,
 ordine_minimo,50,EUR: sotto questa soglia si concentra tutto su un solo ETF,
-glidepath,SI,SI = quota azionaria da 80% a 60% col completamento del piano,
+glidepath,NO,SI = riduci l'azionario avvicinandoti a data_obiettivo (compila anche le due righe sotto),
+data_obiettivo,,"AAAA-MM-GG: quando prevedi di cominciare a usare il denaro. Serve solo col glidepath",
+azionario_finale,60,% di azionario a cui vuoi arrivare alla data obiettivo,
+anni_discesa,8,Quanti anni prima della data obiettivo comincia la riduzione,
 etf_1,VWCE; IE00BK5BQT80; azionario_globale; 45,ticker; ISIN; blocco; peso obiettivo %,"=GOOGLEFINANCE(""BIT:VWCE"")"
 etf_2,XDEW; IE00BLNMYC90; equal_weight; 15,"blocchi validi: azionario_globale, equal_weight, small_cap, oro, obbligazionario","=GOOGLEFINANCE(""LON:XDEW"")*GOOGLEFINANCE(""CURRENCY:USDEUR"")"
-etf_3,WSML; IE00BF4RFH31; small_cap; 10,I pesi devono sommare a 100,"=GOOGLEFINANCE(""LON:WSML"")*GOOGLEFINANCE(""CURRENCY:USDEUR"")"
+etf_3,IUSN; IE00BF4RFH31; small_cap; 10,I pesi devono sommare a 100,
 etf_4,SGLN; IE00B4ND3602; oro; 10,ETC e classi hedged spesso non coperti da GOOGLEFINANCE: lascia vuoto,
 etf_5,VAGF; IE00BG47KH54; obbligazionario; 20,Senza prezzo live vale l'ultimo prezzo del registro,
+piano_1,,"OPZIONALE - piano a tranche: data; capitale; fee settimanale (es. 2026-08-01; 300000; 3000)",
+piano_2,,"Aggiungi una riga per ogni nuovo capitale che decidi di versare, senza toccare le precedenti",

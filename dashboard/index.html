@@ -548,7 +548,7 @@ function renderDetail(){
 
 /* ================= Piano personale ================= */
 function parseProfileCSV(rows){
-  const p={etf:[]};
+  const p={etf:[], tranches:[]};
   for (const r of rows.slice(1)){
     const k=(r[0]||"").trim().toLowerCase(), val=(r[1]||"").trim();
     if (!k) continue;
@@ -556,15 +556,28 @@ function parseProfileCSV(rows){
       const parts = val.split(";").map(s=>s.trim());
       if (parts.length>=4 && parts[0]) p.etf.push({ticker:parts[0],isin:parts[1],block:parts[2].toLowerCase(),weight:parseFloat(parts[3].replace(",","."))||0,
         price:parseAmount(r[3])||null});  // colonna D: prezzo live (GOOGLEFINANCE), opzionale
+    } else if (k.startsWith("piano_")){
+      // "AAAA-MM-GG; capitale; fee settimanale": una tranche di versamenti
+      const parts = val.split(";").map(s=>s.trim());
+      const cap = parseAmount(parts[1]), fee = parseAmount(parts[2]);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(parts[0]||"") && cap>0 && fee>0)
+        p.tranches.push({start:parts[0], capitale:cap, fee});
     } else p[k]=val;
   }
   p.fee = parseAmount(p.fee_base_settimanale) || 0;
-  p.capitale = parseAmount(p.capitale_totale) || 0;
   p.minOrder = parseAmount(p.ordine_minimo) || 0;
   p.glide = (p.glidepath||"").toUpperCase().startsWith("S");
   p.fase = (p.fase||"accumulo").toLowerCase();
-  if (!p.fee || !p.capitale || !p.data_inizio || !p.etf.length)
-    throw new Error("scheda Profilo incompleta: servono fee_base_settimanale, capitale_totale, data_inizio e almeno un etf_1");
+  // piano a tranche unica: le tre chiavi storiche valgono come un piano_1
+  if (!p.tranches.length && p.fee && parseAmount(p.capitale_totale)>0 && p.data_inizio)
+    p.tranches.push({start:p.data_inizio, capitale:parseAmount(p.capitale_totale), fee:p.fee});
+  p.tranches.sort((a,b)=> a.start<b.start ? -1 : 1);
+  p.capitale = p.tranches.reduce((s,t)=>s+t.capitale, 0);
+  p.azionarioFinale = (parseAmount(p.azionario_finale) || 60)/100;
+  p.anniDiscesa = parseAmount(p.anni_discesa) || 8;
+  if (!p.tranches.length || !p.etf.length)
+    throw new Error("scheda Profilo incompleta: servono almeno un etf_1 e o le chiavi "+
+      "fee_base_settimanale + capitale_totale + data_inizio, oppure una riga piano_1");
   return p;
 }
 
@@ -596,10 +609,20 @@ function parseRegister(reg, wantName, isinToTicker={}){
   return {invested, total, lastPrice};
 }
 
-function targetsFor(p, completamento){
+/* Pesi obiettivo. Senza glidepath valgono esattamente quelli scritti nel Profilo.
+   Col glidepath la quota azionaria PARTE da quella scritta e scende fino ad
+   `azionario_finale` avvicinandosi a `data_obiettivo`, cominciando la discesa
+   `anni_discesa` anni prima. È legata al CALENDARIO, non al completamento del
+   piano: chi versa in fretta non ha alcun motivo di difendersi in fretta. */
+function targetsFor(p, now){
+  const raw = Object.fromEntries(p.etf.map(e=>[e.ticker,e.weight/100]));
   const baseEq = p.etf.filter(e=>EQUITY_BLOCKS.includes(e.block)).reduce((a,e)=>a+e.weight,0);
-  if (!p.glide || !baseEq || baseEq>=100) return Object.fromEntries(p.etf.map(e=>[e.ticker,e.weight/100]));
-  const eqShare = 0.80 - 0.20*Math.min(1,Math.max(0,completamento));
+  const eqStart = baseEq/100;
+  if (!p.glide || !p.data_obiettivo || !baseEq || baseEq>=100) return raw;
+  if (p.azionarioFinale >= eqStart) return raw;          // nessuna discesa da fare
+  const years = (new Date(p.data_obiettivo+"T00:00:00Z") - now)/(365.25*86400000);
+  const k = Math.min(1, Math.max(0, 1 - years/p.anniDiscesa));   // 0 = lontano, 1 = arrivato
+  const eqShare = eqStart + (p.azionarioFinale - eqStart)*k;
   const defShare = 1-eqShare, baseDef = 100-baseEq;
   return Object.fromEntries(p.etf.map(e=>[e.ticker,
     EQUITY_BLOCKS.includes(e.block) ? e.weight/baseEq*eqShare : e.weight/baseDef*defShare]));
@@ -669,23 +692,45 @@ async function renderPlan(){
   }
 }
 
+/* Calendario dei versamenti. Ogni tranche del piano matura per conto proprio e
+   il suo "dovuto" non può eccedere il capitale della tranche stessa: così
+   aggiungere capitale in corsa, o cambiare ritmo, non riscrive il passato e non
+   fa saltare il serbatoio. Esaurito il calendario nominale con del capitale
+   ancora da investire, il piano prosegue all'ultimo ritmo noto finché non è
+   tutto versato (il prolungamento naturale, che si autolimita). */
+function planSchedule(P, now){
+  let dovuto=0, feeNow=0, lastFee=0, weeks=0;
+  for (const t of P.tranches){
+    const start = new Date(t.start+"T00:00:00Z");
+    if (now < start) continue;
+    const w = Math.floor((now-start)/604800000)+1;
+    weeks = Math.max(weeks, w);
+    lastFee = t.fee;
+    const due = Math.min(w*t.fee, t.capitale);
+    dovuto += due;
+    if (due < t.capitale) feeNow += t.fee;      // tranche ancora in corso
+  }
+  return {dovuto, weeks:Math.max(1,weeks), feeNow: feeNow || lastFee};
+}
+
 function computePlan(P, invested, total, prices={}){
-  const start = new Date(P.data_inizio+"T00:00:00Z"), now = new Date(LATEST.date+"T00:00:00Z");
-  const weeks = Math.max(1, Math.floor((now-start)/604800000)+1);
-  const serb = Math.max(0, weeks*P.fee - total);
-  const completamento = Math.min(1, total/P.capitale);
+  const now = new Date(LATEST.date+"T00:00:00Z");
+  const {dovuto, weeks, feeNow} = planSchedule(P, now);
+  const fee = feeNow;
+  const serb = Math.max(0, Math.min(dovuto, P.capitale) - total);
+  const completamento = P.capitale>0 ? Math.min(1, total/P.capitale) : 0;
   const remaining = Math.max(0, P.capitale-total);
   const mult = multiplierFor(LATEST.risk.color, LATEST.opportunity.label, LATEST.entry_window);
-  let amount = Math.min(P.fee, mult*P.fee);
-  const extra = Math.min(Math.max(0, mult*P.fee-P.fee), serb);
+  let amount = Math.min(fee, mult*fee);
+  const extra = Math.min(Math.max(0, mult*fee-fee), serb);
   amount = Math.min(amount+extra, remaining);
   const {allocations, skipped, leftover} =
-    quantize(allocate(P, invested, total, Math.round(amount), completamento), prices);
+    quantize(allocate(P, invested, total, Math.round(amount), now), prices);
   // importo della settimana scorsa (5 sedute fa), per il confronto
   const n=HIST.dates.length, j=Math.max(0,n-6);
   const prevMult = multiplierFor(HIST.risk_color[j], HIST.opp_label[j], HIST.entry_window[j]);
-  const prevAmount = Math.min(P.fee,prevMult*P.fee) + Math.min(Math.max(0,prevMult*P.fee-P.fee), serb);
-  return {weeks, serb, completamento, remaining, mult, amount:Math.round(amount), extra:Math.round(extra),
+  const prevAmount = Math.min(fee,prevMult*fee) + Math.min(Math.max(0,prevMult*fee-fee), serb);
+  return {weeks, fee, serb, completamento, remaining, mult, amount:Math.round(amount), extra:Math.round(extra),
           allocations, skipped, leftover, prevAmount:Math.round(Math.min(prevAmount,remaining))};
 }
 
@@ -722,9 +767,9 @@ function quantize({alloc, gapOrder}, prices){
 /* Ripartizione del versamento sul dossier: in proporzione a quanto ogni ETF è
    sotto il proprio peso obiettivo (ribilanciamento tramite versamenti); gli
    ordini sotto `ordine_minimo` vengono accorpati sui fondi più sottopeso. */
-function allocate(P, invested, total, amount, completamento){
+function allocate(P, invested, total, amount, now){
   if (amount<=0) return {alloc:[], gapOrder:[]};
-  const targets = targetsFor(P, completamento);
+  const targets = targetsFor(P, now);
   const gap = {}; let gapSum=0;
   for (const e of P.etf){
     gap[e.ticker] = Math.max(0, targets[e.ticker]*(total+amount) - (invested[e.ticker]||0));
@@ -798,7 +843,7 @@ function fillDecision(P, pl, prof){
   } else alertBox.classList.add("hide");
   document.getElementById("dec-motivation").textContent = motivationText(pl);
   document.getElementById("dec-formula").textContent =
-    `Fee base ${fmtEUR(P.fee)} × moltiplicatore ${fmtN(pl.mult,pl.mult%1?2:1)}` + (pl.extra>0 ? " + serbatoio" : "");
+    `Fee base ${fmtEUR(pl.fee)} × moltiplicatore ${fmtN(pl.mult,pl.mult%1?2:1)}` + (pl.extra>0 ? " + serbatoio" : "");
   const ch = document.getElementById("dec-change");
   if (pl.amount>pl.prevAmount){ ch.textContent=`↑ da ${fmtEUR(pl.prevAmount)} della settimana scorsa`; ch.style.color="var(--m800)"; }
   else if (pl.amount<pl.prevAmount){ ch.textContent=`↓ da ${fmtEUR(pl.prevAmount)} della settimana scorsa`; ch.style.color="var(--n600)"; }
