@@ -1,5 +1,5 @@
 {
- "updated": "2026-08-28",
+ "updated": "2026-08-29",
  "prices": {
   "IE00BK5BQT80": {
    "ticker": "VWCE.MI",
@@ -18,8 +18,8 @@
   },
   "IE00B4ND3602": {
    "ticker": "SGLN.MI",
-   "price": 76.46,
-   "date": "2026-08-27"
+   "price": 76.33,
+   "date": "2026-08-28"
   },
   "IE00BG47KH54": {
    "ticker": "VAGF.MI",
